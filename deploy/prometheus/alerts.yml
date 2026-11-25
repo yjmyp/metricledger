@@ -1,0 +1,82 @@
+groups:
+  - name: metricledger-api
+    rules:
+      - alert: MetricLedgerHigh5xxRate
+        expr: |
+          (
+            sum(rate(metricledger_http_requests_total{status=~"5.."}[5m]))
+            /
+            clamp_min(sum(rate(metricledger_http_requests_total[5m])), 1)
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: page
+        annotations:
+          summary: MetricLedger HTTP 5xx rate is above 5%
+          runbook: Check API logs, DuckDB file locks, and ledger write failures.
+
+      - alert: MetricLedgerHighP95Latency
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum(rate(metricledger_http_request_duration_seconds_bucket[5m])) by (le)
+          ) > 2.5
+        for: 10m
+        labels:
+          severity: page
+        annotations:
+          summary: MetricLedger request P95 exceeds 2.5 seconds
+          runbook: Inspect the slowest route and DuckDB query time, then check data volume and concurrency.
+
+      - alert: MetricLedgerDuckDbQueryErrors
+        expr: increase(metricledger_duckdb_query_errors_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: page
+        annotations:
+          summary: MetricLedger DuckDB query errors detected
+          runbook: Check the database path, read-only permissions, and the emitted SQL audit.
+
+      - alert: MetricLedgerLedgerErrors
+        expr: |
+          increase(metricledger_sqlite_ledger_write_errors_total[5m])
+          + increase(metricledger_sqlite_ledger_read_errors_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: page
+        annotations:
+          summary: MetricLedger SQLite ledger errors detected
+          runbook: Check disk space, SQLite WAL permissions, and ledger schema migration state.
+
+      - alert: MetricLedgerAnalysisFailures
+        expr: |
+          increase(
+            metricledger_analysis_issues_total{
+              severity="ERROR",
+              code=~"HEADLINE_QUERY_FAILED|DIAGNOSTIC_QUERY_FAILED|SNAPSHOT_STALE|SNAPSHOT_COMPLETE|DUPLICATE_RATE|NULL_RATE|POSITIVE_DENOMINATOR"
+            }[5m]
+          ) > 0
+        for: 1m
+        labels:
+          severity: page
+        annotations:
+          summary: MetricLedger analysis or data-quality failures detected
+          runbook: Inspect the issue code, trace ID, SQL audit, snapshot manifest, and DuckDB quality metrics.
+
+      - alert: MetricLedgerRateLimitedSpike
+        expr: increase(metricledger_rate_limited_total[5m]) > 20
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: MetricLedger is returning a sustained rate-limit spike
+          runbook: Identify the tenant/principal and verify the configured limit and API-key distribution.
+
+      - alert: MetricLedgerAuthFailureSpike
+        expr: increase(metricledger_auth_failures_total[5m]) > 20
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: MetricLedger authentication failures are elevated
+          runbook: Check token rotation, client configuration, and whether requests are missing bearer tokens.

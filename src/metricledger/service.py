@@ -272,10 +272,15 @@ class AnalysisService:
         )
         return self._persist(response)
 
-    def get(self, analysis_id: str) -> AnalysisResponse | None:
+    def get(
+        self,
+        analysis_id: str,
+        *,
+        tenant_id: str | None = None,
+    ) -> AnalysisResponse | None:
         if self.ledger is None:
             return None
-        return self.ledger.get(analysis_id)
+        return self.ledger.get(analysis_id, tenant_id=tenant_id)
 
     def _execute_scalar(
         self,

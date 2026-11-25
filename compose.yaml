@@ -1,0 +1,36 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: metricledger:local
+    ports:
+      - "8000:8000"
+    environment:
+      METRICLEDGER_HOST: 0.0.0.0
+      METRICLEDGER_PORT: "8000"
+      METRICLEDGER_DB: /app/data/metricledger.duckdb
+      METRICLEDGER_LEDGER: /app/data/audit.sqlite3
+      METRICLEDGER_STATIC_DIR: /app/web/dist
+      METRICLEDGER_RATE_LIMIT_PER_MINUTE: "120"
+      METRICLEDGER_AUTH_JSON: ${METRICLEDGER_AUTH_JSON:-}
+      METRICLEDGER_PLANNER_BASE_URL: ${METRICLEDGER_PLANNER_BASE_URL:-}
+      METRICLEDGER_PLANNER_MODEL: ${METRICLEDGER_PLANNER_MODEL:-}
+      METRICLEDGER_PLANNER_API_KEY: ${METRICLEDGER_PLANNER_API_KEY:-}
+    volumes:
+      - metricledger-data:/app/data
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    depends_on:
+      - api
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./deploy/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./deploy/prometheus/alerts.yml:/etc/prometheus/alerts.yml:ro
+    restart: unless-stopped
+
+volumes:
+  metricledger-data:

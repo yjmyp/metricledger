@@ -64,6 +64,8 @@ class QueryCompiler:
             parameters.extend(values)
             placeholders = ", ".join("?" for _ in values)
             where.append(f"f.{dimension.column} IN ({placeholders})")
+        parameters.append(scope.tenant_id)
+        where.append("f.tenant_id = ?")
 
         sql = (
             f"SELECT {', '.join(selected)} "
@@ -78,6 +80,7 @@ class QueryCompiler:
             allowed_tables={snapshot.table_name},
             allowed_columns={
                 *self.registry.bundle.allowed_columns,
+                "tenant_id",
                 "metric_value",
                 "numerator_value",
                 "denominator_value",
@@ -88,7 +91,7 @@ class QueryCompiler:
                 self.registry.dimension(dimension_id).column
                 for dimension_id in metric.allowed_dimensions
             }
-            | {metric.time_column},
+            | {metric.time_column, "tenant_id"},
         )
         return CompiledQuery(
             sql=sql,

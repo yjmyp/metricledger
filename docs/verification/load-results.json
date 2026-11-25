@@ -1,0 +1,1359 @@
+{
+  "status": "COMPLETE",
+  "generated_at": "2026-11-25T16:34:35+00:00",
+  "environment": {
+    "python": "3.10.8",
+    "httpx": "0.28.1",
+    "base_url": "http://127.0.0.1:8011",
+    "concurrency": 12,
+    "planned_requests": 120
+  },
+  "workload": {
+    "duration_seconds": 11.274,
+    "completed_requests": 120,
+    "throughput_requests_per_second": 10.644,
+    "http_error_count": 0,
+    "semantic_error_count": 0,
+    "expected_clarification_count": 12,
+    "error_count": 0,
+    "error_rate": 0.0,
+    "status_counts": {
+      "200": 120
+    },
+    "routes": {
+      "catalog": {
+        "count": 12,
+        "p50_ms": 17.495,
+        "p95_ms": 159.761,
+        "p99_ms": 159.761,
+        "max_ms": 159.761
+      },
+      "clarify": {
+        "count": 12,
+        "p50_ms": 38.051,
+        "p95_ms": 196.704,
+        "p99_ms": 196.704,
+        "max_ms": 196.704
+      },
+      "eval": {
+        "count": 12,
+        "p50_ms": 23.122,
+        "p95_ms": 196.384,
+        "p99_ms": 196.384,
+        "max_ms": 196.384
+      },
+      "health": {
+        "count": 12,
+        "p50_ms": 20.446,
+        "p95_ms": 165.614,
+        "p99_ms": 165.614,
+        "max_ms": 165.614
+      },
+      "investigate": {
+        "count": 36,
+        "p50_ms": 2827.032,
+        "p95_ms": 4823.195,
+        "p99_ms": 5645.419,
+        "max_ms": 5645.419
+      },
+      "readback": {
+        "count": 12,
+        "p50_ms": 27.382,
+        "p95_ms": 156.281,
+        "p99_ms": 156.281,
+        "max_ms": 156.281
+      },
+      "value": {
+        "count": 24,
+        "p50_ms": 951.193,
+        "p95_ms": 2205.076,
+        "p99_ms": 2367.043,
+        "max_ms": 2367.043
+      }
+    }
+  },
+  "latency_ms": {
+    "min": 12.885,
+    "p50": 155.458,
+    "p95": 3893.734,
+    "p99": 4823.195,
+    "max": 5645.419
+  },
+  "database_counters": {
+    "duckdb": {
+      "query_count": 168,
+      "query_time_ms": 113169.791,
+      "error_count": 0
+    },
+    "sqlite": {
+      "write_count": 72,
+      "write_time_ms": 1477.953,
+      "read_count": 12,
+      "read_time_ms": 109.46,
+      "error_count": 0
+    }
+  },
+  "bottleneck": {
+    "status": "MEASURED",
+    "primary_candidate": "duckdb",
+    "primary_candidate_ratio": 0.888252,
+    "duckdb_time_to_request_time_ratio": 0.888252,
+    "sqlite_time_to_request_time_ratio": 0.012459,
+    "slowest_route_by_p95": "investigate",
+    "slowest_route_p95_ms": 4823.195,
+    "duckdb_error_count": 0,
+    "sqlite_error_count": 0,
+    "evidence": "DB time ratios use the sum of wall-clock request latencies as the denominator; this is a local attribution heuristic, not a profiler or production trace."
+  },
+  "raw_results": [
+    {
+      "route": "health",
+      "status_code": 200,
+      "elapsed_ms": 87.082,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "catalog",
+      "status_code": 200,
+      "elapsed_ms": 148.528,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "investigate",
+      "status_code": 200,
+      "elapsed_ms": 2010.097,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "investigate",
+      "status_code": 200,
+      "elapsed_ms": 4079.364,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "investigate",
+      "status_code": 200,
+      "elapsed_ms": 3391.239,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "value",
+      "status_code": 200,
+      "elapsed_ms": 804.277,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "value",
+      "status_code": 200,
+      "elapsed_ms": 374.572,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "clarify",
+      "status_code": 200,
+      "elapsed_ms": 196.704,
+      "error": null,
+      "semantic_issue_codes": [
+        "MISSING_PERIOD"
+      ],
+      "expected_semantic_issue_codes": [
+        "MISSING_PERIOD"
+      ],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "readback",
+      "status_code": 200,
+      "elapsed_ms": 156.281,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "eval",
+      "status_code": 200,
+      "elapsed_ms": 196.384,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "health",
+      "status_code": 200,
+      "elapsed_ms": 165.614,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "catalog",
+      "status_code": 200,
+      "elapsed_ms": 159.761,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "investigate",
+      "status_code": 200,
+      "elapsed_ms": 4823.195,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "investigate",
+      "status_code": 200,
+      "elapsed_ms": 5645.419,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "investigate",
+      "status_code": 200,
+      "elapsed_ms": 3608.952,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "value",
+      "status_code": 200,
+      "elapsed_ms": 559.629,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "value",
+      "status_code": 200,
+      "elapsed_ms": 1687.261,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "clarify",
+      "status_code": 200,
+      "elapsed_ms": 64.721,
+      "error": null,
+      "semantic_issue_codes": [
+        "MISSING_PERIOD"
+      ],
+      "expected_semantic_issue_codes": [
+        "MISSING_PERIOD"
+      ],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "readback",
+      "status_code": 200,
+      "elapsed_ms": 70.026,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "eval",
+      "status_code": 200,
+      "elapsed_ms": 24.853,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "health",
+      "status_code": 200,
+      "elapsed_ms": 26.088,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "catalog",
+      "status_code": 200,
+      "elapsed_ms": 27.129,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "investigate",
+      "status_code": 200,
+      "elapsed_ms": 2419.971,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "investigate",
+      "status_code": 200,
+      "elapsed_ms": 1253.421,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "investigate",
+      "status_code": 200,
+      "elapsed_ms": 3893.734,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "value",
+      "status_code": 200,
+      "elapsed_ms": 2367.043,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "value",
+      "status_code": 200,
+      "elapsed_ms": 139.688,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "clarify",
+      "status_code": 200,
+      "elapsed_ms": 40.137,
+      "error": null,
+      "semantic_issue_codes": [
+        "MISSING_PERIOD"
+      ],
+      "expected_semantic_issue_codes": [
+        "MISSING_PERIOD"
+      ],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "readback",
+      "status_code": 200,
+      "elapsed_ms": 22.676,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "eval",
+      "status_code": 200,
+      "elapsed_ms": 33.456,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "health",
+      "status_code": 200,
+      "elapsed_ms": 14.211,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "catalog",
+      "status_code": 200,
+      "elapsed_ms": 19.987,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "investigate",
+      "status_code": 200,
+      "elapsed_ms": 2184.018,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "investigate",
+      "status_code": 200,
+      "elapsed_ms": 1490.712,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "investigate",
+      "status_code": 200,
+      "elapsed_ms": 2827.032,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "value",
+      "status_code": 200,
+      "elapsed_ms": 951.193,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "value",
+      "status_code": 200,
+      "elapsed_ms": 2205.076,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "clarify",
+      "status_code": 200,
+      "elapsed_ms": 36.022,
+      "error": null,
+      "semantic_issue_codes": [
+        "MISSING_PERIOD"
+      ],
+      "expected_semantic_issue_codes": [
+        "MISSING_PERIOD"
+      ],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "readback",
+      "status_code": 200,
+      "elapsed_ms": 21.931,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "eval",
+      "status_code": 200,
+      "elapsed_ms": 20.568,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "health",
+      "status_code": 200,
+      "elapsed_ms": 13.478,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "catalog",
+      "status_code": 200,
+      "elapsed_ms": 15.446,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "investigate",
+      "status_code": 200,
+      "elapsed_ms": 3656.055,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "investigate",
+      "status_code": 200,
+      "elapsed_ms": 2259.23,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "investigate",
+      "status_code": 200,
+      "elapsed_ms": 3742.4,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "value",
+      "status_code": 200,
+      "elapsed_ms": 2038.156,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "value",
+      "status_code": 200,
+      "elapsed_ms": 109.28,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "clarify",
+      "status_code": 200,
+      "elapsed_ms": 38.818,
+      "error": null,
+      "semantic_issue_codes": [
+        "MISSING_PERIOD"
+      ],
+      "expected_semantic_issue_codes": [
+        "MISSING_PERIOD"
+      ],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "readback",
+      "status_code": 200,
+      "elapsed_ms": 20.09,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "eval",
+      "status_code": 200,
+      "elapsed_ms": 19.587,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "health",
+      "status_code": 200,
+      "elapsed_ms": 13.722,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "catalog",
+      "status_code": 200,
+      "elapsed_ms": 12.885,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "investigate",
+      "status_code": 200,
+      "elapsed_ms": 3993.435,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "investigate",
+      "status_code": 200,
+      "elapsed_ms": 3547.464,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "investigate",
+      "status_code": 200,
+      "elapsed_ms": 4230.042,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "value",
+      "status_code": 200,
+      "elapsed_ms": 104.261,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "value",
+      "status_code": 200,
+      "elapsed_ms": 2163.388,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "clarify",
+      "status_code": 200,
+      "elapsed_ms": 33.11,
+      "error": null,
+      "semantic_issue_codes": [
+        "MISSING_PERIOD"
+      ],
+      "expected_semantic_issue_codes": [
+        "MISSING_PERIOD"
+      ],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "readback",
+      "status_code": 200,
+      "elapsed_ms": 32.015,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "eval",
+      "status_code": 200,
+      "elapsed_ms": 23.402,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "health",
+      "status_code": 200,
+      "elapsed_ms": 20.446,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "catalog",
+      "status_code": 200,
+      "elapsed_ms": 13.741,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "investigate",
+      "status_code": 200,
+      "elapsed_ms": 452.337,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "investigate",
+      "status_code": 200,
+      "elapsed_ms": 2918.442,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "investigate",
+      "status_code": 200,
+      "elapsed_ms": 4278.915,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "value",
+      "status_code": 200,
+      "elapsed_ms": 1282.152,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "value",
+      "status_code": 200,
+      "elapsed_ms": 1626.516,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "clarify",
+      "status_code": 200,
+      "elapsed_ms": 34.009,
+      "error": null,
+      "semantic_issue_codes": [
+        "MISSING_PERIOD"
+      ],
+      "expected_semantic_issue_codes": [
+        "MISSING_PERIOD"
+      ],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "readback",
+      "status_code": 200,
+      "elapsed_ms": 21.863,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "eval",
+      "status_code": 200,
+      "elapsed_ms": 21.64,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "health",
+      "status_code": 200,
+      "elapsed_ms": 16.983,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "catalog",
+      "status_code": 200,
+      "elapsed_ms": 14.576,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "investigate",
+      "status_code": 200,
+      "elapsed_ms": 314.028,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "investigate",
+      "status_code": 200,
+      "elapsed_ms": 3297.908,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "investigate",
+      "status_code": 200,
+      "elapsed_ms": 1608.357,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "value",
+      "status_code": 200,
+      "elapsed_ms": 874.88,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "value",
+      "status_code": 200,
+      "elapsed_ms": 1114.489,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "clarify",
+      "status_code": 200,
+      "elapsed_ms": 30.992,
+      "error": null,
+      "semantic_issue_codes": [
+        "MISSING_PERIOD"
+      ],
+      "expected_semantic_issue_codes": [
+        "MISSING_PERIOD"
+      ],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "readback",
+      "status_code": 200,
+      "elapsed_ms": 24.408,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "eval",
+      "status_code": 200,
+      "elapsed_ms": 35.507,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "health",
+      "status_code": 200,
+      "elapsed_ms": 15.983,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "catalog",
+      "status_code": 200,
+      "elapsed_ms": 16.163,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "investigate",
+      "status_code": 200,
+      "elapsed_ms": 3536.436,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "investigate",
+      "status_code": 200,
+      "elapsed_ms": 2038.341,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "investigate",
+      "status_code": 200,
+      "elapsed_ms": 365.781,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "value",
+      "status_code": 200,
+      "elapsed_ms": 207.838,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "value",
+      "status_code": 200,
+      "elapsed_ms": 2083.758,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "clarify",
+      "status_code": 200,
+      "elapsed_ms": 49.978,
+      "error": null,
+      "semantic_issue_codes": [
+        "MISSING_PERIOD"
+      ],
+      "expected_semantic_issue_codes": [
+        "MISSING_PERIOD"
+      ],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "readback",
+      "status_code": 200,
+      "elapsed_ms": 30.574,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "eval",
+      "status_code": 200,
+      "elapsed_ms": 23.122,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "health",
+      "status_code": 200,
+      "elapsed_ms": 22.82,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "catalog",
+      "status_code": 200,
+      "elapsed_ms": 21.656,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "investigate",
+      "status_code": 200,
+      "elapsed_ms": 3596.607,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "investigate",
+      "status_code": 200,
+      "elapsed_ms": 2364.83,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "investigate",
+      "status_code": 200,
+      "elapsed_ms": 3751.66,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "value",
+      "status_code": 200,
+      "elapsed_ms": 155.458,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "value",
+      "status_code": 200,
+      "elapsed_ms": 1752.403,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "clarify",
+      "status_code": 200,
+      "elapsed_ms": 38.051,
+      "error": null,
+      "semantic_issue_codes": [
+        "MISSING_PERIOD"
+      ],
+      "expected_semantic_issue_codes": [
+        "MISSING_PERIOD"
+      ],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "readback",
+      "status_code": 200,
+      "elapsed_ms": 30.264,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "eval",
+      "status_code": 200,
+      "elapsed_ms": 28.079,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "health",
+      "status_code": 200,
+      "elapsed_ms": 36.859,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "catalog",
+      "status_code": 200,
+      "elapsed_ms": 37.221,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "investigate",
+      "status_code": 200,
+      "elapsed_ms": 2928.753,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "investigate",
+      "status_code": 200,
+      "elapsed_ms": 1594.924,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "investigate",
+      "status_code": 200,
+      "elapsed_ms": 1714.334,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "value",
+      "status_code": 200,
+      "elapsed_ms": 138.309,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "value",
+      "status_code": 200,
+      "elapsed_ms": 857.93,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "clarify",
+      "status_code": 200,
+      "elapsed_ms": 38.74,
+      "error": null,
+      "semantic_issue_codes": [
+        "MISSING_PERIOD"
+      ],
+      "expected_semantic_issue_codes": [
+        "MISSING_PERIOD"
+      ],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "readback",
+      "status_code": 200,
+      "elapsed_ms": 29.194,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "eval",
+      "status_code": 200,
+      "elapsed_ms": 23.094,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "health",
+      "status_code": 200,
+      "elapsed_ms": 21.941,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "catalog",
+      "status_code": 200,
+      "elapsed_ms": 17.495,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "investigate",
+      "status_code": 200,
+      "elapsed_ms": 1813.103,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "investigate",
+      "status_code": 200,
+      "elapsed_ms": 1207.497,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "investigate",
+      "status_code": 200,
+      "elapsed_ms": 1703.734,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "value",
+      "status_code": 200,
+      "elapsed_ms": 1547.147,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "value",
+      "status_code": 200,
+      "elapsed_ms": 1176.05,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "clarify",
+      "status_code": 200,
+      "elapsed_ms": 27.045,
+      "error": null,
+      "semantic_issue_codes": [
+        "MISSING_PERIOD"
+      ],
+      "expected_semantic_issue_codes": [
+        "MISSING_PERIOD"
+      ],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "readback",
+      "status_code": 200,
+      "elapsed_ms": 27.382,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    },
+    {
+      "route": "eval",
+      "status_code": 200,
+      "elapsed_ms": 20.198,
+      "error": null,
+      "semantic_issue_codes": [],
+      "expected_semantic_issue_codes": [],
+      "unexpected_semantic_issue_codes": [],
+      "missing_expected_semantic_issue_codes": []
+    }
+  ],
+  "caveat": "This is a local mixed HTTP measurement against one API process and a local DuckDB/SQLite setup. It is not a production SLA."
+}

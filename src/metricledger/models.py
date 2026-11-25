@@ -172,12 +172,15 @@ class SnapshotRecord(Model):
 
 
 class Scope(Model):
+    tenant_id: str = "demo"
     values: dict[str, list[str]] = Field(default_factory=dict)
 
 
 class Principal(Model):
     principal_id: str
     allowed_values: dict[str, list[str]]
+    tenant_id: str = "demo"
+    roles: list[str] = Field(default_factory=lambda: ["viewer", "analyst"])
     auth_policy_version: str = "local-demo-v1"
 
 
@@ -192,6 +195,7 @@ class AnalysisIntent(Model):
 
 class AnalysisContext(Model):
     analysis_id: str
+    tenant_id: str
     intent: AnalysisIntent
     metric_id: str
     semantic_bundle_id: str

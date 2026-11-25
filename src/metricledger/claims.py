@@ -278,16 +278,20 @@ class EvidenceValidator:
                 baseline_groups = EvidenceValidator._group_metric_values(
                     baseline_grouped
                 )
-                total_delta = sum(
-                    current_groups.values()
-                ) - sum(baseline_groups.values())
                 group_delta = current_groups.get(
                     claim.scope.group_value, 0.0
                 ) - baseline_groups.get(claim.scope.group_value, 0.0)
                 values["contribution_abs"] = group_delta
-                if total_delta != 0:
+                gross_group_movement = sum(
+                    abs(
+                        current_groups.get(group, 0.0)
+                        - baseline_groups.get(group, 0.0)
+                    )
+                    for group in set(current_groups) | set(baseline_groups)
+                )
+                if gross_group_movement != 0:
                     values["contribution_share_pct"] = (
-                        group_delta / total_delta * 100
+                        abs(group_delta) / gross_group_movement * 100
                     )
 
         for key in ALLOWED_EVIDENCE_KEYS - set(values):

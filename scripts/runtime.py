@@ -1,13 +1,17 @@
 from __future__ import annotations
 
+import json
 import os
 from datetime import datetime
 from pathlib import Path
+from typing import Mapping
 
 from metricledger.data import DuckDbEngine
 from metricledger.ledger import SqliteLedger
 from metricledger.models import AnalysisRequest, BudgetPolicy, Principal
+from metricledger.observability import InMemoryRateLimiter
 from metricledger.planners import OpenAICompatibleHypothesisPlanner
+from metricledger.security import ApiKeyAuthenticator
 from metricledger.semantic import SemanticRegistry
 from metricledger.service import AnalysisService
 from metricledger.snapshots import SnapshotRepository
@@ -21,6 +25,44 @@ DEMO_ALLOWED_VALUES = {
     "channel": ["app", "web", "mini_program"],
     "category": ["electronics", "beauty", "home", "fashion"],
 }
+
+
+def authenticator_from_environment(
+    environ: Mapping[str, str] | None = None,
+) -> ApiKeyAuthenticator | None:
+    """Load API keys from a JSON object without logging or echoing them."""
+
+    values = environ or os.environ
+    raw = values.get("METRICLEDGER_AUTH_JSON", "").strip()
+    if not raw:
+        return None
+    try:
+        payload = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        raise ValueError(
+            "METRICLEDGER_AUTH_JSON must be a JSON object"
+        ) from exc
+    if not isinstance(payload, dict):
+        raise ValueError("METRICLEDGER_AUTH_JSON must be a JSON object")
+    return ApiKeyAuthenticator.from_mapping(payload)
+
+
+def rate_limiter_from_environment(
+    environ: Mapping[str, str] | None = None,
+) -> InMemoryRateLimiter | None:
+    values = environ or os.environ
+    raw = values.get("METRICLEDGER_RATE_LIMIT_PER_MINUTE", "").strip()
+    if not raw:
+        return None
+    try:
+        limit = int(raw)
+    except ValueError as exc:
+        raise ValueError(
+            "METRICLEDGER_RATE_LIMIT_PER_MINUTE must be an integer"
+        ) from exc
+    if limit < 1:
+        return None
+    return InMemoryRateLimiter(limit=limit, window_seconds=60.0)
 
 
 def _planner_from_environment() -> OpenAICompatibleHypothesisPlanner | None:

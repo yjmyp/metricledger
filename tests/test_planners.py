@@ -1,6 +1,7 @@
 import json
 
 import httpx
+import pytest
 
 from metricledger.models import (
     MetricKind,
@@ -93,3 +94,81 @@ def test_http_planner_filters_unknown_and_duplicate_hypotheses():
         "region",
         "channel",
     ]
+    assert planner.last_trace.outcome == "MODEL_SUCCESS"
+    assert planner.last_trace.fallback_used is False
+
+
+def test_http_planner_falls_back_when_all_model_choices_are_invalid():
+    def handler(request: httpx.Request) -> httpx.Response:
+        content = json.dumps(
+            {
+                "hypotheses": [
+                    {
+                        "dimension_id": "invented_dimension",
+                        "rationale_code": "unsafe",
+                        "priority": 0,
+                    }
+                ]
+            }
+        )
+        return httpx.Response(
+            200,
+            json={"choices": [{"message": {"content": content}}]},
+        )
+
+    planner = OpenAICompatibleHypothesisPlanner(
+        base_url="https://planner.example/v1",
+        model="test-model",
+        client=httpx.Client(transport=httpx.MockTransport(handler)),
+    )
+    registry = SemanticRegistry.load_default()
+
+    hypotheses = planner.propose(
+        observation(),
+        list(registry.bundle.dimensions),
+        remaining_queries=4,
+    )
+
+    assert [hypothesis.dimension_id for hypothesis in hypotheses] == [
+        "region",
+        "channel",
+        "category",
+    ]
+    assert planner.last_trace.outcome == "FALLBACK_INVALID_OUTPUT"
+    assert planner.last_trace.fallback_used is True
+    assert planner.last_trace.fallback_reason == "no valid hypotheses"
+
+
+@pytest.mark.parametrize(
+    ("transport_error", "expected"),
+    [
+        (
+            httpx.ReadTimeout("timed out"),
+            "FALLBACK_TIMEOUT",
+        ),
+        (
+            httpx.ConnectError("offline"),
+            "FALLBACK_HTTP_ERROR",
+        ),
+    ],
+)
+def test_http_planner_records_fallback_reason(transport_error, expected):
+    def handler(request: httpx.Request) -> httpx.Response:
+        raise transport_error
+
+    planner = OpenAICompatibleHypothesisPlanner(
+        base_url="https://planner.example/v1",
+        model="test-model",
+        client=httpx.Client(transport=httpx.MockTransport(handler)),
+    )
+    registry = SemanticRegistry.load_default()
+
+    hypotheses = planner.propose(
+        observation(),
+        list(registry.bundle.dimensions),
+        remaining_queries=4,
+    )
+
+    assert hypotheses
+    assert planner.last_trace.outcome == expected
+    assert planner.last_trace.fallback_used is True

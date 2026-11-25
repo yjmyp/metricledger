@@ -7,6 +7,7 @@
     "sales_batch_20261123_2300"
   ],
   "allowed_columns": [
+    "tenant_id",
     "event_date",
     "region",
     "channel",

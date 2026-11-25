@@ -231,13 +231,23 @@ class InvestigationService:
             return None
         top_group = max(all_groups, key=lambda group: abs(deltas[group]))
         concentration = abs(deltas[top_group]) / total_absolute_delta
+        has_offsetting_changes = (
+            any(value > 0 for value in deltas.values())
+            and any(value < 0 for value in deltas.values())
+        )
+        offsetting_note = (
+            "；各分组存在正负抵消，该占比不等于对净变化的解释力。"
+            if has_offsetting_changes
+            else "。"
+        )
         claim = Claim(
             claim_id=f"claim_{uuid4().hex[:16]}",
             analysis_id=self.context.analysis_id,
             claim_type=ClaimType.CONTRIBUTION,
             template=(
-                f"{top_group} 的{dimension_id}分组对支付 GMV 总变化的"
-                "算术贡献为 {{evidence:contribution_share_pct}}；"
+                f"{top_group} 的{dimension_id}分组对全部分组绝对变化的占比为 "
+                "{{evidence:contribution_share_pct}}"
+                f"{offsetting_note}"
                 "这只表示可加指标的分组差异，不代表因果。"
             ),
             evidence_refs=[baseline.result_id, current.result_id],

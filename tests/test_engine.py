@@ -146,9 +146,27 @@ def test_snapshot_metadata_period_matches_the_physical_table(database):
             """
             SELECT min(event_date), max(event_date), count(*)
             FROM sales_batch_20261123_2300
+            WHERE tenant_id = 'demo'
             """
         ).fetchone()
 
     assert first_date == date(2026, 10, 1)
     assert last_date == date(2026, 11, 23)
     assert row_count == 2_592
+
+
+def test_tenants_have_physically_separated_rows(database):
+    with duckdb.connect(str(database), read_only=True) as connection:
+        rows = connection.execute(
+            """
+            SELECT tenant_id, count(*), sum(paid_gmv)
+            FROM sales_batch_20261123_2300
+            GROUP BY tenant_id
+            ORDER BY tenant_id
+            """
+        ).fetchall()
+
+    assert rows[0][0] == "demo"
+    assert rows[0][1] == 2_592
+    assert rows[0][2] != rows[1][2]
+    assert rows[1][0] == "tenant_b"

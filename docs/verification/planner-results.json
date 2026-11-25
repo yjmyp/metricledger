@@ -1,0 +1,300 @@
+{
+  "status": "COMPLETE",
+  "generated_at": "2026-11-25T16:34:56+00:00",
+  "scope": "15 deterministic supported_investigation scenarios",
+  "case_count": 15,
+  "planner_inputs": {
+    "candidate_dimensions_only": true,
+    "raw_event_rows_exposed": false,
+    "max_hypotheses": 3
+  },
+  "heuristic": {
+    "status": "RUN",
+    "planner": "heuristic",
+    "case_count": 15,
+    "failure_count": 0,
+    "failure_rate": 0.0,
+    "fallback_count": 0,
+    "fallback_rate": 0.0,
+    "latency_ms": {
+      "min": 0.003,
+      "p50": 0.004,
+      "p95": 0.013,
+      "max": 0.013
+    },
+    "outcome_counts": {},
+    "fallback_reason_counts": {},
+    "results": [
+      {
+        "analysis_id": "planner-supported_investigation-01-001",
+        "elapsed_ms": 0.013,
+        "hypothesis_count": 1,
+        "failure": false,
+        "outcome": null,
+        "fallback_used": false
+      },
+      {
+        "analysis_id": "planner-supported_investigation-01-002",
+        "elapsed_ms": 0.006,
+        "hypothesis_count": 1,
+        "failure": false,
+        "outcome": null,
+        "fallback_used": false
+      },
+      {
+        "analysis_id": "planner-supported_investigation-01-003",
+        "elapsed_ms": 0.004,
+        "hypothesis_count": 1,
+        "failure": false,
+        "outcome": null,
+        "fallback_used": false
+      },
+      {
+        "analysis_id": "planner-supported_investigation-01-004",
+        "elapsed_ms": 0.008,
+        "hypothesis_count": 3,
+        "failure": false,
+        "outcome": null,
+        "fallback_used": false
+      },
+      {
+        "analysis_id": "planner-supported_investigation-01-005",
+        "elapsed_ms": 0.004,
+        "hypothesis_count": 1,
+        "failure": false,
+        "outcome": null,
+        "fallback_used": false
+      },
+      {
+        "analysis_id": "planner-supported_investigation-01-006",
+        "elapsed_ms": 0.004,
+        "hypothesis_count": 1,
+        "failure": false,
+        "outcome": null,
+        "fallback_used": false
+      },
+      {
+        "analysis_id": "planner-supported_investigation-01-007",
+        "elapsed_ms": 0.003,
+        "hypothesis_count": 1,
+        "failure": false,
+        "outcome": null,
+        "fallback_used": false
+      },
+      {
+        "analysis_id": "planner-supported_investigation-01-008",
+        "elapsed_ms": 0.006,
+        "hypothesis_count": 2,
+        "failure": false,
+        "outcome": null,
+        "fallback_used": false
+      },
+      {
+        "analysis_id": "planner-supported_investigation-01-009",
+        "elapsed_ms": 0.003,
+        "hypothesis_count": 1,
+        "failure": false,
+        "outcome": null,
+        "fallback_used": false
+      },
+      {
+        "analysis_id": "planner-supported_investigation-01-010",
+        "elapsed_ms": 0.003,
+        "hypothesis_count": 1,
+        "failure": false,
+        "outcome": null,
+        "fallback_used": false
+      },
+      {
+        "analysis_id": "planner-supported_investigation-01-011",
+        "elapsed_ms": 0.003,
+        "hypothesis_count": 1,
+        "failure": false,
+        "outcome": null,
+        "fallback_used": false
+      },
+      {
+        "analysis_id": "planner-supported_investigation-01-012",
+        "elapsed_ms": 0.003,
+        "hypothesis_count": 1,
+        "failure": false,
+        "outcome": null,
+        "fallback_used": false
+      },
+      {
+        "analysis_id": "planner-supported_investigation-01-013",
+        "elapsed_ms": 0.003,
+        "hypothesis_count": 1,
+        "failure": false,
+        "outcome": null,
+        "fallback_used": false
+      },
+      {
+        "analysis_id": "planner-supported_investigation-01-014",
+        "elapsed_ms": 0.006,
+        "hypothesis_count": 2,
+        "failure": false,
+        "outcome": null,
+        "fallback_used": false
+      },
+      {
+        "analysis_id": "planner-supported_investigation-01-015",
+        "elapsed_ms": 0.008,
+        "hypothesis_count": 2,
+        "failure": false,
+        "outcome": null,
+        "fallback_used": false
+      }
+    ],
+    "trace_available": false
+  },
+  "model": {
+    "status": "RUN",
+    "planner": "openai_compatible",
+    "case_count": 15,
+    "failure_count": 0,
+    "failure_rate": 0.0,
+    "fallback_count": 0,
+    "fallback_rate": 0.0,
+    "latency_ms": {
+      "min": 529.122,
+      "p50": 915.992,
+      "p95": 1591.464,
+      "max": 1591.464
+    },
+    "outcome_counts": {
+      "MODEL_SUCCESS": 15
+    },
+    "fallback_reason_counts": {},
+    "results": [
+      {
+        "analysis_id": "planner-supported_investigation-01-001",
+        "elapsed_ms": 1308.498,
+        "hypothesis_count": 1,
+        "failure": false,
+        "outcome": "MODEL_SUCCESS",
+        "fallback_used": false
+      },
+      {
+        "analysis_id": "planner-supported_investigation-01-002",
+        "elapsed_ms": 1074.447,
+        "hypothesis_count": 1,
+        "failure": false,
+        "outcome": "MODEL_SUCCESS",
+        "fallback_used": false
+      },
+      {
+        "analysis_id": "planner-supported_investigation-01-003",
+        "elapsed_ms": 529.122,
+        "hypothesis_count": 1,
+        "failure": false,
+        "outcome": "MODEL_SUCCESS",
+        "fallback_used": false
+      },
+      {
+        "analysis_id": "planner-supported_investigation-01-004",
+        "elapsed_ms": 1210.511,
+        "hypothesis_count": 3,
+        "failure": false,
+        "outcome": "MODEL_SUCCESS",
+        "fallback_used": false
+      },
+      {
+        "analysis_id": "planner-supported_investigation-01-005",
+        "elapsed_ms": 727.552,
+        "hypothesis_count": 1,
+        "failure": false,
+        "outcome": "MODEL_SUCCESS",
+        "fallback_used": false
+      },
+      {
+        "analysis_id": "planner-supported_investigation-01-006",
+        "elapsed_ms": 738.844,
+        "hypothesis_count": 1,
+        "failure": false,
+        "outcome": "MODEL_SUCCESS",
+        "fallback_used": false
+      },
+      {
+        "analysis_id": "planner-supported_investigation-01-007",
+        "elapsed_ms": 827.197,
+        "hypothesis_count": 1,
+        "failure": false,
+        "outcome": "MODEL_SUCCESS",
+        "fallback_used": false
+      },
+      {
+        "analysis_id": "planner-supported_investigation-01-008",
+        "elapsed_ms": 741.068,
+        "hypothesis_count": 2,
+        "failure": false,
+        "outcome": "MODEL_SUCCESS",
+        "fallback_used": false
+      },
+      {
+        "analysis_id": "planner-supported_investigation-01-009",
+        "elapsed_ms": 703.137,
+        "hypothesis_count": 1,
+        "failure": false,
+        "outcome": "MODEL_SUCCESS",
+        "fallback_used": false
+      },
+      {
+        "analysis_id": "planner-supported_investigation-01-010",
+        "elapsed_ms": 1591.464,
+        "hypothesis_count": 1,
+        "failure": false,
+        "outcome": "MODEL_SUCCESS",
+        "fallback_used": false
+      },
+      {
+        "analysis_id": "planner-supported_investigation-01-011",
+        "elapsed_ms": 1132.279,
+        "hypothesis_count": 1,
+        "failure": false,
+        "outcome": "MODEL_SUCCESS",
+        "fallback_used": false
+      },
+      {
+        "analysis_id": "planner-supported_investigation-01-012",
+        "elapsed_ms": 984.445,
+        "hypothesis_count": 1,
+        "failure": false,
+        "outcome": "MODEL_SUCCESS",
+        "fallback_used": false
+      },
+      {
+        "analysis_id": "planner-supported_investigation-01-013",
+        "elapsed_ms": 663.943,
+        "hypothesis_count": 1,
+        "failure": false,
+        "outcome": "MODEL_SUCCESS",
+        "fallback_used": false
+      },
+      {
+        "analysis_id": "planner-supported_investigation-01-014",
+        "elapsed_ms": 915.992,
+        "hypothesis_count": 2,
+        "failure": false,
+        "outcome": "MODEL_SUCCESS",
+        "fallback_used": false
+      },
+      {
+        "analysis_id": "planner-supported_investigation-01-015",
+        "elapsed_ms": 990.488,
+        "hypothesis_count": 2,
+        "failure": false,
+        "outcome": "MODEL_SUCCESS",
+        "fallback_used": false
+      }
+    ],
+    "trace_available": true,
+    "credentials_configured": true,
+    "model": "api.deepseek.com/deepseek-chat"
+  },
+  "environment": {
+    "python": "3.10.8",
+    "httpx": "0.28.1"
+  },
+  "caveat": "The heuristic comparison is a real in-process measurement on synthetic scenarios. The model comparison is RUN only when credentials or an injected client are explicitly configured."
+}

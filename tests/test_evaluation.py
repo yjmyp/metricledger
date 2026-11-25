@@ -108,7 +108,7 @@ def test_report_persists_exact_counts_and_configuration(report):
     payload = report.to_dict()
 
     assert payload["scenario_count"] == len(report.results[METRICLEDGER])
-    assert payload["environment"]["snapshot_row_count"] == 2_592
+    assert payload["environment"]["snapshot_row_count"] == 5_184
     assert payload["commit"] == "test-commit"
     assert payload["worktree_dirty"] is True
     assert set(payload["baselines"]) == {

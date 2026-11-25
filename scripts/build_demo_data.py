@@ -60,6 +60,7 @@ def _create_table(connection: duckdb.DuckDBPyConnection, table: str, end_date: d
     connection.execute(
         f"""
         CREATE OR REPLACE TABLE {table} (
+            tenant_id VARCHAR NOT NULL,
             event_date DATE NOT NULL,
             region VARCHAR NOT NULL,
             channel VARCHAR NOT NULL,
@@ -82,6 +83,9 @@ def _create_table(connection: duckdb.DuckDBPyConnection, table: str, end_date: d
                 INTERVAL 1 DAY
             )
         ),
+        tenants(tenant_id, tenant_index) AS (
+            VALUES ('demo', 0), ('tenant_b', 1)
+        ),
         regions(region, region_index) AS (
             VALUES ('east', 0), ('west', 1), ('north', 2), ('south', 3)
         ),
@@ -93,6 +97,7 @@ def _create_table(connection: duckdb.DuckDBPyConnection, table: str, end_date: d
         ),
         combinations AS (
             SELECT
+                tenants.tenant_id,
                 dates.event_date,
                 regions.region,
                 channels.channel,
@@ -103,19 +108,25 @@ def _create_table(connection: duckdb.DuckDBPyConnection, table: str, end_date: d
                 (
                     dates.event_date BETWEEN DATE '2026-11-17' AND DATE '2026-11-23'
                     AND regions.region = 'east'
+                    AND tenants.tenant_id = 'demo'
                 ) AS east_incident
             FROM dates
+            CROSS JOIN tenants
             CROSS JOIN regions
             CROSS JOIN channels
             CROSS JOIN categories
         )
         SELECT
+            tenant_id,
             event_date,
             region,
             channel,
             category,
             CASE WHEN east_incident THEN 12 ELSE 20 END AS paid_orders,
-            100 + region_index + channel_index + category_index AS sessions,
+            CASE
+                WHEN tenant_id = 'tenant_b' THEN 140
+                ELSE 100 + region_index + channel_index + category_index
+            END AS sessions,
             CASE WHEN east_incident THEN 3 ELSE 2 END AS canceled_orders,
             CASE
                 WHEN east_incident
@@ -124,6 +135,7 @@ def _create_table(connection: duckdb.DuckDBPyConnection, table: str, end_date: d
                     AND category = 'electronics'
                 THEN 1440.0
                 WHEN east_incident THEN 1520.0
+                WHEN tenant_id = 'tenant_b' THEN 2700.0
                 ELSE 2400.0
             END AS paid_gmv
         FROM combinations

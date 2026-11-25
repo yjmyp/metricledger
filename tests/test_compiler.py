@@ -45,7 +45,10 @@ def test_compiler_binds_times_and_scope_as_parameters(compiler: QueryCompiler, i
         intent,
         metric,
         SNAPSHOT,
-        Scope(values={"region": ["east", "west"], "channel": ["app", "web"]}),
+        Scope(
+            tenant_id="demo",
+            values={"region": ["east", "west"], "channel": ["app", "web"]},
+        ),
     )
 
     assert compiled.sql.startswith("SELECT")
@@ -53,6 +56,9 @@ def test_compiler_binds_times_and_scope_as_parameters(compiler: QueryCompiler, i
     assert "east" not in compiled.sql
     assert "sales_batch_20261123_2300" in compiled.sql
     assert compiled.parameters[:2] == ["2026-11-17", "2026-11-23"]
+    assert compiled.parameters[-1] == "demo"
+    assert "tenant_id = ?" in compiled.sql
+    assert "demo" not in compiled.sql
     assert compiled.referenced_tables == ["sales_batch_20261123_2300"]
     assert compiled.fingerprint
 
@@ -181,6 +187,7 @@ def test_valid_compiler_sql_passes_guard(compiler: QueryCompiler, intent):
             "sessions",
             "canceled_orders",
             "paid_gmv",
+                "tenant_id",
             "metric_value",
         },
     )

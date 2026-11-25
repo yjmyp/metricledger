@@ -1,0 +1,201 @@
+{
+  "status": "COMPLETE",
+  "generated_at": "2026-11-25T16:34:24+00:00",
+  "dataset": {
+    "kind": "deterministic synthetic event-level snapshots",
+    "path": "data/metricledger-scale.duckdb",
+    "total_events": 2000000
+  },
+  "database": {
+    "total_events": 2000000,
+    "file_size_bytes": 20197376,
+    "rows_by_snapshot": {
+      "batch_20261116_2300": 1000000,
+      "batch_20261123_2300": 1000000
+    },
+    "tenant_event_counts": {
+      "demo": 1800000,
+      "tenant_b": 200000
+    },
+    "date_bounds_by_snapshot": {
+      "batch_20261116_2300": {
+        "minimum": "2026-10-01",
+        "maximum": "2026-11-16"
+      },
+      "batch_20261123_2300": {
+        "minimum": "2026-10-01",
+        "maximum": "2026-11-23"
+      }
+    },
+    "database_size_pragma": {
+      "database_name": "metricledger-scale",
+      "database_size": "19.2 MiB",
+      "block_size": 262144,
+      "total_blocks": 77,
+      "used_blocks": 39,
+      "free_blocks": 38,
+      "wal_size": "0 bytes",
+      "memory_usage": "1.7 MiB",
+      "memory_limit": "12.5 GiB"
+    }
+  },
+  "analysis": {
+    "analysis_id": "an_4944bb5ca60f4fe4",
+    "admission_status": "ADMITTED",
+    "completeness": "PARTIAL",
+    "queries_used": 4,
+    "claim_count": 2,
+    "answer": "支付 GMV从 6,992,887.60 变为 6,995,351.00，变化 0.04%。\nsouth 的region分组对全部分组绝对变化的占比为 25.07%；各分组存在正负抵消，该占比不等于对净变化的解释力。这只表示可加指标的分组差异，不代表因果。",
+    "evidence_rows": [
+      1,
+      1,
+      4,
+      4
+    ],
+    "sql_audit": [
+      {
+        "result_id": "result_1988f5e7b0884846",
+        "sql": "SELECT SUM(f.paid_gmv) AS metric_value FROM sales_batch_20261123_2300 AS f WHERE f.event_date BETWEEN ? AND ? AND f.region IN (?, ?, ?, ?) AND f.channel IN (?, ?, ?) AND f.category IN (?, ?, ?, ?) AND f.tenant_id = ?",
+        "parameters": [
+          "2026-11-17",
+          "2026-11-23",
+          "east",
+          "west",
+          "north",
+          "south",
+          "app",
+          "web",
+          "mini_program",
+          "electronics",
+          "beauty",
+          "home",
+          "fashion",
+          "demo"
+        ],
+        "fingerprint": "fdc4671e940bb601dc408f2861d6f5f3c59651195ae43789e163444ce64d4443",
+        "row_count": 1,
+        "snapshot_id": "batch_20261123_2300",
+        "elapsed_ms": 80
+      },
+      {
+        "result_id": "result_e4c20416e10542f1",
+        "sql": "SELECT SUM(f.paid_gmv) AS metric_value FROM sales_batch_20261123_2300 AS f WHERE f.event_date BETWEEN ? AND ? AND f.region IN (?, ?, ?, ?) AND f.channel IN (?, ?, ?) AND f.category IN (?, ?, ?, ?) AND f.tenant_id = ?",
+        "parameters": [
+          "2026-11-10",
+          "2026-11-16",
+          "east",
+          "west",
+          "north",
+          "south",
+          "app",
+          "web",
+          "mini_program",
+          "electronics",
+          "beauty",
+          "home",
+          "fashion",
+          "demo"
+        ],
+        "fingerprint": "509025353b6f29ad229a79139e757af0fede74f13dfb9f04a27b30bc82ccd632",
+        "row_count": 1,
+        "snapshot_id": "batch_20261123_2300",
+        "elapsed_ms": 83
+      },
+      {
+        "result_id": "result_9c6de943848c4b90",
+        "sql": "SELECT f.region AS dimension_value, SUM(f.paid_gmv) AS metric_value FROM sales_batch_20261123_2300 AS f WHERE f.event_date BETWEEN ? AND ? AND f.region IN (?, ?, ?, ?) AND f.channel IN (?, ?, ?) AND f.category IN (?, ?, ?, ?) AND f.tenant_id = ? GROUP BY f.region",
+        "parameters": [
+          "2026-11-17",
+          "2026-11-23",
+          "east",
+          "west",
+          "north",
+          "south",
+          "app",
+          "web",
+          "mini_program",
+          "electronics",
+          "beauty",
+          "home",
+          "fashion",
+          "demo"
+        ],
+        "fingerprint": "9a316ae40284a3d5aba3c8b8e1df431b796670d0481289115cffe5b776d20190",
+        "row_count": 4,
+        "snapshot_id": "batch_20261123_2300",
+        "elapsed_ms": 93
+      },
+      {
+        "result_id": "result_2ff31c629ce74790",
+        "sql": "SELECT f.region AS dimension_value, SUM(f.paid_gmv) AS metric_value FROM sales_batch_20261123_2300 AS f WHERE f.event_date BETWEEN ? AND ? AND f.region IN (?, ?, ?, ?) AND f.channel IN (?, ?, ?) AND f.category IN (?, ?, ?, ?) AND f.tenant_id = ? GROUP BY f.region",
+        "parameters": [
+          "2026-11-10",
+          "2026-11-16",
+          "east",
+          "west",
+          "north",
+          "south",
+          "app",
+          "web",
+          "mini_program",
+          "electronics",
+          "beauty",
+          "home",
+          "fashion",
+          "demo"
+        ],
+        "fingerprint": "a08c3ed627a52390545c90cbace5f43e8f842adff6bfbc351f99d1bb2565d3ca",
+        "row_count": 4,
+        "snapshot_id": "batch_20261123_2300",
+        "elapsed_ms": 98
+      }
+    ],
+    "service_wall_elapsed_ms": 388.935
+  },
+  "database_stats": {
+    "execution_count": 4,
+    "error_count": 0,
+    "total_query_ms": 353.288,
+    "average_query_ms": 88.322
+  },
+  "explain_analyze": [
+    {
+      "result_id": "result_1988f5e7b0884846",
+      "sql_fingerprint": "fdc4671e940bb601dc408f2861d6f5f3c59651195ae43789e163444ce64d4443",
+      "row_count": 1,
+      "engine_elapsed_ms": 80,
+      "total_time_seconds": 0.0119,
+      "plan": "analyzed_plan\n┌─────────────────────────────────────┐\n│┌───────────────────────────────────┐│\n││    Query Profiling Information    ││\n│└───────────────────────────────────┘│\n└─────────────────────────────────────┘\nEXPLAIN ANALYZE SELECT SUM(f.paid_gmv) AS metric_value FROM sales_batch_20261123_2300 AS f WHERE f.event_date BETWEEN ? AND ? AND f.region IN (?, ?, ?, ?) AND f.channel IN (?, ?, ?) AND f.category IN (?, ?, ?, ?) AND f.tenant_id = ?\n┌────────────────────────────────────────────────┐\n│┌──────────────────────────────────────────────┐│\n││              Total Time: 0.0119s             ││\n│└──────────────────────────────────────────────┘│\n└────────────────────────────────────────────────┘\n┌───────────────────────────┐\n│           QUERY           │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│      EXPLAIN_ANALYZE      │\n│    ────────────────────   │\n│                           │\n│           0 rows          │\n│           0.00s           │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│    UNGROUPED_AGGREGATE    │\n│    ────────────────────   │\n│    Aggregates: sum(#0)    │\n│                           │\n│                           │\n│                           │\n│           1 row           │\n│           0.00s           │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│         PROJECTION        │\n│    ────────────────────   │\n│          paid_gmv         │\n│                           │\n│                           │\n│                           │\n│        116,662 rows       │\n│           0.00s           │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│         PROJECTION        │\n│    ────────────────────   │\n│             #3            │\n│                           │\n│                           │\n│                           │\n│        116,662 rows       │\n│           0.00s           │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│           FILTER          │\n│    ────────────────────   │\n│  (((channel = 'app') OR   │\n│   (channel = 'web') OR    │\n│ (channel = 'mini_program')│\n│  ) AND ((region = 'east') │\n│  OR (region = 'west') OR  │\n│   (region = 'north') OR   │\n│ (region = 'south')) AND ( │\n│ (category = 'electronics')│\n│  OR (category = 'beauty') │\n│  OR (category = 'home') OR│\n│  (category = 'fashion'))) │\n│                           │\n│                           │\n│                           │\n│        116,662 rows       │\n│           0.02s           │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│         TABLE_SCAN        │\n│    ────────────────────   │\n│           Table:          │\n│ \"metricledger-scale\".main │\n│ .sales_batch_20261123_2300│\n│                           │\n│   Type: Sequential Scan   │\n│                           │\n│        Projections:       │\n│           region          │\n│          channel          │\n│          category         │\n│          paid_gmv         │\n│                           │\n│          Filters:         │\n│ event_date>='2026-11-17': │\n│   :DATE AND event_date<=  │\n│     '2026-11-23'::DATE    │\n│ optional: region IN ('east│\n│ ', 'west', 'north', 'south│\n│             ')            │\n│ optional: channel IN ('app│\n│ ', 'web', 'mini_program') │\n│  optional: category IN (  │\n│ 'electronics', 'beauty',  │\n│     'home', 'fashion')    │\n│      tenant_id='demo'     │\n│                           │\n│                           │\n│                           │\n│        116,662 rows       │\n│           0.03s           │\n└───────────────────────────┘\n"
+    },
+    {
+      "result_id": "result_e4c20416e10542f1",
+      "sql_fingerprint": "509025353b6f29ad229a79139e757af0fede74f13dfb9f04a27b30bc82ccd632",
+      "row_count": 1,
+      "engine_elapsed_ms": 83,
+      "total_time_seconds": 0.0102,
+      "plan": "analyzed_plan\n┌─────────────────────────────────────┐\n│┌───────────────────────────────────┐│\n││    Query Profiling Information    ││\n│└───────────────────────────────────┘│\n└─────────────────────────────────────┘\nEXPLAIN ANALYZE SELECT SUM(f.paid_gmv) AS metric_value FROM sales_batch_20261123_2300 AS f WHERE f.event_date BETWEEN ? AND ? AND f.region IN (?, ?, ?, ?) AND f.channel IN (?, ?, ?) AND f.category IN (?, ?, ?, ?) AND f.tenant_id = ?\n┌────────────────────────────────────────────────┐\n│┌──────────────────────────────────────────────┐│\n││              Total Time: 0.0102s             ││\n│└──────────────────────────────────────────────┘│\n└────────────────────────────────────────────────┘\n┌───────────────────────────┐\n│           QUERY           │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│      EXPLAIN_ANALYZE      │\n│    ────────────────────   │\n│                           │\n│           0 rows          │\n│           0.00s           │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│    UNGROUPED_AGGREGATE    │\n│    ────────────────────   │\n│    Aggregates: sum(#0)    │\n│                           │\n│                           │\n│                           │\n│           1 row           │\n│           0.00s           │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│         PROJECTION        │\n│    ────────────────────   │\n│          paid_gmv         │\n│                           │\n│                           │\n│                           │\n│        116,662 rows       │\n│           0.00s           │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│         PROJECTION        │\n│    ────────────────────   │\n│             #3            │\n│                           │\n│                           │\n│                           │\n│        116,662 rows       │\n│           0.00s           │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│           FILTER          │\n│    ────────────────────   │\n│  (((channel = 'app') OR   │\n│   (channel = 'web') OR    │\n│ (channel = 'mini_program')│\n│  ) AND ((region = 'east') │\n│  OR (region = 'west') OR  │\n│   (region = 'north') OR   │\n│ (region = 'south')) AND ( │\n│ (category = 'electronics')│\n│  OR (category = 'beauty') │\n│  OR (category = 'home') OR│\n│  (category = 'fashion'))) │\n│                           │\n│                           │\n│                           │\n│        116,662 rows       │\n│           0.02s           │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│         TABLE_SCAN        │\n│    ────────────────────   │\n│           Table:          │\n│ \"metricledger-scale\".main │\n│ .sales_batch_20261123_2300│\n│                           │\n│   Type: Sequential Scan   │\n│                           │\n│        Projections:       │\n│           region          │\n│          channel          │\n│          category         │\n│          paid_gmv         │\n│                           │\n│          Filters:         │\n│ event_date>='2026-11-10': │\n│   :DATE AND event_date<=  │\n│     '2026-11-16'::DATE    │\n│ optional: region IN ('east│\n│ ', 'west', 'north', 'south│\n│             ')            │\n│ optional: channel IN ('app│\n│ ', 'web', 'mini_program') │\n│  optional: category IN (  │\n│ 'electronics', 'beauty',  │\n│     'home', 'fashion')    │\n│      tenant_id='demo'     │\n│                           │\n│                           │\n│                           │\n│        116,662 rows       │\n│           0.02s           │\n└───────────────────────────┘\n"
+    },
+    {
+      "result_id": "result_9c6de943848c4b90",
+      "sql_fingerprint": "9a316ae40284a3d5aba3c8b8e1df431b796670d0481289115cffe5b776d20190",
+      "row_count": 4,
+      "engine_elapsed_ms": 93,
+      "total_time_seconds": 0.0126,
+      "plan": "analyzed_plan\n┌─────────────────────────────────────┐\n│┌───────────────────────────────────┐│\n││    Query Profiling Information    ││\n│└───────────────────────────────────┘│\n└─────────────────────────────────────┘\nEXPLAIN ANALYZE SELECT f.region AS dimension_value, SUM(f.paid_gmv) AS metric_value FROM sales_batch_20261123_2300 AS f WHERE f.event_date BETWEEN ? AND ? AND f.region IN (?, ?, ?, ?) AND f.channel IN (?, ?, ?) AND f.category IN (?, ?, ?, ?) AND f.tenant_id = ? GROUP BY f.region\n┌────────────────────────────────────────────────┐\n│┌──────────────────────────────────────────────┐│\n││              Total Time: 0.0126s             ││\n│└──────────────────────────────────────────────┘│\n└────────────────────────────────────────────────┘\n┌───────────────────────────┐\n│           QUERY           │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│      EXPLAIN_ANALYZE      │\n│    ────────────────────   │\n│                           │\n│           0 rows          │\n│           0.00s           │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│         PROJECTION        │\n│    ────────────────────   │\n│__internal_decompress_strin│\n│           g(#0)           │\n│             #1            │\n│                           │\n│                           │\n│                           │\n│           4 rows          │\n│           0.00s           │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│       HASH_GROUP_BY       │\n│    ────────────────────   │\n│         Groups: #0        │\n│    Aggregates: sum(#1)    │\n│                           │\n│                           │\n│                           │\n│           4 rows          │\n│           0.01s           │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│         PROJECTION        │\n│    ────────────────────   │\n│           region          │\n│          paid_gmv         │\n│                           │\n│                           │\n│                           │\n│        116,662 rows       │\n│           0.00s           │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│         PROJECTION        │\n│    ────────────────────   │\n│__internal_compress_string_│\n│        ubigint(#0)        │\n│             #1            │\n│                           │\n│                           │\n│                           │\n│        116,662 rows       │\n│           0.00s           │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│         PROJECTION        │\n│    ────────────────────   │\n│             #0            │\n│             #3            │\n│                           │\n│                           │\n│                           │\n│        116,662 rows       │\n│           0.00s           │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│           FILTER          │\n│    ────────────────────   │\n│  (((channel = 'app') OR   │\n│   (channel = 'web') OR    │\n│ (channel = 'mini_program')│\n│  ) AND ((region = 'east') │\n│  OR (region = 'west') OR  │\n│   (region = 'north') OR   │\n│ (region = 'south')) AND ( │\n│ (category = 'electronics')│\n│  OR (category = 'beauty') │\n│  OR (category = 'home') OR│\n│  (category = 'fashion'))) │\n│                           │\n│                           │\n│                           │\n│        116,662 rows       │\n│           0.02s           │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│         TABLE_SCAN        │\n│    ────────────────────   │\n│           Table:          │\n│ \"metricledger-scale\".main │\n│ .sales_batch_20261123_2300│\n│                           │\n│   Type: Sequential Scan   │\n│                           │\n│        Projections:       │\n│           region          │\n│          channel          │\n│          category         │\n│          paid_gmv         │\n│                           │\n│          Filters:         │\n│ event_date>='2026-11-17': │\n│   :DATE AND event_date<=  │\n│     '2026-11-23'::DATE    │\n│ optional: region IN ('east│\n│ ', 'west', 'north', 'south│\n│             ')            │\n│ optional: channel IN ('app│\n│ ', 'web', 'mini_program') │\n│  optional: category IN (  │\n│ 'electronics', 'beauty',  │\n│     'home', 'fashion')    │\n│      tenant_id='demo'     │\n│                           │\n│                           │\n│                           │\n│        116,662 rows       │\n│           0.02s           │\n└───────────────────────────┘\n"
+    },
+    {
+      "result_id": "result_2ff31c629ce74790",
+      "sql_fingerprint": "a08c3ed627a52390545c90cbace5f43e8f842adff6bfbc351f99d1bb2565d3ca",
+      "row_count": 4,
+      "engine_elapsed_ms": 98,
+      "total_time_seconds": 0.0126,
+      "plan": "analyzed_plan\n┌─────────────────────────────────────┐\n│┌───────────────────────────────────┐│\n││    Query Profiling Information    ││\n│└───────────────────────────────────┘│\n└─────────────────────────────────────┘\nEXPLAIN ANALYZE SELECT f.region AS dimension_value, SUM(f.paid_gmv) AS metric_value FROM sales_batch_20261123_2300 AS f WHERE f.event_date BETWEEN ? AND ? AND f.region IN (?, ?, ?, ?) AND f.channel IN (?, ?, ?) AND f.category IN (?, ?, ?, ?) AND f.tenant_id = ? GROUP BY f.region\n┌────────────────────────────────────────────────┐\n│┌──────────────────────────────────────────────┐│\n││              Total Time: 0.0126s             ││\n│└──────────────────────────────────────────────┘│\n└────────────────────────────────────────────────┘\n┌───────────────────────────┐\n│           QUERY           │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│      EXPLAIN_ANALYZE      │\n│    ────────────────────   │\n│                           │\n│           0 rows          │\n│           0.00s           │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│         PROJECTION        │\n│    ────────────────────   │\n│__internal_decompress_strin│\n│           g(#0)           │\n│             #1            │\n│                           │\n│                           │\n│                           │\n│           4 rows          │\n│           0.00s           │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│       HASH_GROUP_BY       │\n│    ────────────────────   │\n│         Groups: #0        │\n│    Aggregates: sum(#1)    │\n│                           │\n│                           │\n│                           │\n│           4 rows          │\n│           0.02s           │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│         PROJECTION        │\n│    ────────────────────   │\n│           region          │\n│          paid_gmv         │\n│                           │\n│                           │\n│                           │\n│        116,662 rows       │\n│           0.00s           │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│         PROJECTION        │\n│    ────────────────────   │\n│__internal_compress_string_│\n│        ubigint(#0)        │\n│             #1            │\n│                           │\n│                           │\n│                           │\n│        116,662 rows       │\n│           0.00s           │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│         PROJECTION        │\n│    ────────────────────   │\n│             #0            │\n│             #3            │\n│                           │\n│                           │\n│                           │\n│        116,662 rows       │\n│           0.00s           │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│           FILTER          │\n│    ────────────────────   │\n│  (((channel = 'app') OR   │\n│   (channel = 'web') OR    │\n│ (channel = 'mini_program')│\n│  ) AND ((region = 'east') │\n│  OR (region = 'west') OR  │\n│   (region = 'north') OR   │\n│ (region = 'south')) AND ( │\n│ (category = 'electronics')│\n│  OR (category = 'beauty') │\n│  OR (category = 'home') OR│\n│  (category = 'fashion'))) │\n│                           │\n│                           │\n│                           │\n│        116,662 rows       │\n│           0.02s           │\n└─────────────┬─────────────┘\n┌─────────────┴─────────────┐\n│         TABLE_SCAN        │\n│    ────────────────────   │\n│           Table:          │\n│ \"metricledger-scale\".main │\n│ .sales_batch_20261123_2300│\n│                           │\n│   Type: Sequential Scan   │\n│                           │\n│        Projections:       │\n│           region          │\n│          channel          │\n│          category         │\n│          paid_gmv         │\n│                           │\n│          Filters:         │\n│ event_date>='2026-11-10': │\n│   :DATE AND event_date<=  │\n│     '2026-11-16'::DATE    │\n│ optional: region IN ('east│\n│ ', 'west', 'north', 'south│\n│             ')            │\n│ optional: channel IN ('app│\n│ ', 'web', 'mini_program') │\n│  optional: category IN (  │\n│ 'electronics', 'beauty',  │\n│     'home', 'fashion')    │\n│      tenant_id='demo'     │\n│                           │\n│                           │\n│                           │\n│        116,662 rows       │\n│           0.01s           │\n└───────────────────────────┘\n"
+    }
+  ],
+  "environment": {
+    "python": "3.10.8",
+    "duckdb": "1.5.6",
+    "platform": "Windows-10-10.0.26200-SP0"
+  },
+  "caveat": "This is a local measurement on deterministic synthetic data, not a production SLA or an external benchmark."
+}

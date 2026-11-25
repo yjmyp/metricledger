@@ -1,6 +1,7 @@
 from datetime import date, datetime
 from zoneinfo import ZoneInfo
 
+import duckdb
 import pytest
 
 from metricledger.admission import AdmissionService
@@ -184,3 +185,60 @@ def test_budget_is_reserved_before_query_execution(
     assert outcome.queries_used == 1
     assert outcome.completeness is Completeness.PARTIAL
     assert "BUDGET_EXHAUSTED" in outcome.issue_codes
+
+
+def test_contribution_share_uses_gross_group_movement_when_changes_offset(
+    registry: SemanticRegistry,
+    database,
+    principal: Principal,
+):
+    with duckdb.connect(str(database)) as connection:
+        connection.execute(
+            """
+            UPDATE sales_batch_20261123_2300 SET paid_gmv = 100.0
+            WHERE tenant_id = 'demo'
+            """
+        )
+        connection.execute(
+            """
+            UPDATE sales_batch_20261123_2300
+            SET paid_gmv = CASE region
+                WHEN 'east' THEN 250.0
+                WHEN 'west' THEN 0.0
+                WHEN 'north' THEN 100.0
+                WHEN 'south' THEN 200.0
+            END
+            WHERE tenant_id = 'demo'
+              AND event_date BETWEEN DATE '2026-11-17' AND DATE '2026-11-23'
+            """
+        )
+    service = make_service(
+        registry,
+        database,
+        AnalysisIntent(
+            metric_id="paid_gmv",
+            question_kind=QuestionKind.INVESTIGATE,
+            period=CURRENT,
+            comparison_period=PREVIOUS,
+            candidate_dimensions=["region"],
+        ),
+        principal,
+        BudgetPolicy(max_queries=4),
+    )
+
+    outcome = service.investigate()
+
+    contribution = next(
+        claim
+        for claim in outcome.claims
+        if claim.claim_type is ClaimType.CONTRIBUTION
+    )
+    artifacts = {artifact.result_id: artifact for artifact in outcome.artifacts}
+    validated = EvidenceValidator(registry).validate(contribution, artifacts)
+
+    # Group deltas are +150, -100, 0, +100. The gross movement is 350,
+    # so east accounts for 150/350, not 150/net-change 150.
+    assert validated.evidence_values["contribution_share_pct"] == pytest.approx(
+        300 / 7
+    )
+    assert "正负抵消" in ClaimRenderer().render(validated)

@@ -38,6 +38,15 @@ FastAPI response + SQLite audit ledger + React receipt
 
 准入失败时不会执行 SQL，也不会产生 Claim。固定快照未覆盖、过期、质量检查阻塞或授权范围不一致时，系统返回明确状态，不把结果补成零。
 
+HTTP 边界还包括：
+
+- Bearer 令牌在启动时哈希，运行时不保留原始令牌。
+- 服务端认证身份覆盖请求中的 `principal`、`tenant_id`、角色和允许过滤值。
+- 分析回读按租户作用域查询，跨租户 ID 与不存在 ID 返回相同结果。
+- 限流按 `tenant_id:principal_id` 计数；当前实现只在单进程内有效。
+- W3C `traceparent`、`X-Request-ID` 和 `X-Trace-ID` 用于关联响应与结构化日志。
+- `/api/metrics` 暴露 HTTP、认证、限流、分析问题和数据库计数器，供 Prometheus 抓取。
+
 ## Modules
 
 | Module | Responsibility |
@@ -56,6 +65,8 @@ FastAPI response + SQLite audit ledger + React receipt
 | `service.py` | 按固定顺序编排分析，阻止失败路径进入查询引擎 |
 | `ledger.py` | 保存分析、证据和关系，不保存密钥或原始明细 |
 | `api.py` | 暴露分析、目录、健康和评测接口 |
+| `security.py` | 哈希化 Bearer 令牌认证、租户身份和角色映射 |
+| `observability.py` | 限流、Prometheus 文本指标、W3C 追踪与日志上下文 |
 | `evaluation.py` | 用确定性场景和基线复现安全指标 |
 
 ## Non-Negotiable Invariants
@@ -68,6 +79,8 @@ FastAPI response + SQLite audit ledger + React receipt
 6. 模板渲染后不允许残留 `{` 或 `}`，防止占位符泄漏。
 7. 拒绝、澄清、不可用和执行失败均不得返回业务零值。
 8. 模型规划失败时回退到启发式排序；模型输出不能扩大权限或预算。
+9. 认证启用后，请求自报的租户和角色不能覆盖服务端身份。
+10. 跨租户结果回读不得泄露分析是否存在。
 
 ## Investigation Model
 
@@ -104,6 +117,16 @@ SQLite 使用 WAL 模式，保存三类数据：
 
 持久化内容是规范 JSON 和证据摘要，不包含 API key、Authorization header 或完整原始业务明细。
 
+## Operational Evidence
+
+- `scripts/build_scale_data.py` 生成两个各 100 万事件的确定性 DuckDB 快照，共 200 万事件，用于真实规模查询。
+- `scripts/benchmark_scale.py` 执行完整分析并保存 SQL、`EXPLAIN ANALYZE` 和查询耗时。
+- `scripts/benchmark_load.py` 执行混合 HTTP 并发负载，报告吞吐、P50/P95/P99、错误率、DuckDB/SQLite 增量计数和本地瓶颈归因。
+- `scripts/benchmark_planners.py` 在相同 15 个调查场景上比较启发式与 OpenAI-compatible planner。缺少端点时模型部分必须是 `NOT_RUN`；当前验收记录包含一次通过 DeepSeek OpenAI-compatible 接口完成的真实对比，结果见 `docs/verification/planner-report.md`。
+- `deploy/prometheus/alerts.yml` 覆盖 5xx、P95、DuckDB、SQLite、分析失败、限流和认证异常。
+
+这些报告是本机可复现证据，不是生产 SLA。
+
 ## Failure Semantics
 
 | Failure | Result |
@@ -124,6 +147,9 @@ SQLite 使用 WAL 模式，保存三类数据：
 - 模板输出必须来自验证后的证据。
 - 运行日志不记录密钥。
 - 前端只渲染文本，不把用户内容解释为 HTML。
+- Bearer 令牌只在服务端配置中提供，认证身份覆盖客户端自报身份。
+- 分析回读必须匹配认证租户，越权访问与不存在资源不可区分。
+- Prometheus 告警表达式已通过 PromQL 解析与指标名对应检查；生产环境仍需按实际 SLO 调整阈值。
 
 ## Evaluation Boundary
 

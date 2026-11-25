@@ -107,6 +107,7 @@ class AdmissionService:
 
         context = AnalysisContext(
             analysis_id=f"an_{uuid4().hex[:16]}",
+            tenant_id=principal.tenant_id,
             intent=intent,
             metric_id=metric.metric_id,
             semantic_bundle_id=self.registry.bundle.bundle_id,
@@ -152,7 +153,7 @@ class AdmissionService:
             values[dimension_id] = [
                 value for value in dimension.values if value in set(allowed)
             ]
-        return Scope(values=values)
+        return Scope(tenant_id=principal.tenant_id, values=values)
 
     def _scope_is_sufficient(
         self,

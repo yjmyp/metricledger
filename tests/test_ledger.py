@@ -99,3 +99,22 @@ def test_ledger_rejects_artifact_replacement_atomically(ledger, response):
         ledger.save(second)
 
     assert ledger.get("an_second") is None
+
+
+def test_ledger_lookup_is_tenant_scoped(ledger, response):
+    ledger.save(response)
+
+    assert ledger.get(response.analysis_id, tenant_id="demo") is not None
+    assert ledger.get(response.analysis_id, tenant_id="tenant_b") is None
+
+
+def test_ledger_records_write_and_read_latency_counters(ledger, response):
+    ledger.save(response)
+    assert ledger.get(response.analysis_id, tenant_id="demo") is not None
+
+    assert ledger.write_count == 1
+    assert ledger.write_error_count == 0
+    assert ledger.total_write_ms >= 0
+    assert ledger.read_count == 1
+    assert ledger.read_error_count == 0
+    assert ledger.total_read_ms >= 0

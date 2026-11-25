@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
@@ -8,7 +9,11 @@ from metricledger.planners import (
     HeuristicHypothesisPlanner,
     OpenAICompatibleHypothesisPlanner,
 )
-from scripts.runtime import build_service
+from scripts.runtime import (
+    authenticator_from_environment,
+    build_service,
+    rate_limiter_from_environment,
+)
 
 
 def test_build_service_uses_heuristic_planner_by_default(
@@ -68,3 +73,58 @@ def test_build_service_rejects_partial_openai_planner_configuration(
             database_path=tmp_path / "partial.duckdb",
             ledger_path=None,
         )
+
+
+def test_authenticator_from_environment_uses_hashed_bearer_keys(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv(
+        "METRICLEDGER_AUTH_JSON",
+        json.dumps(
+            {
+                "runtime-secret": {
+                    "tenant_id": "tenant_a",
+                    "principal_id": "runtime-user",
+                    "roles": ["viewer", "analyst"],
+                    "allowed_values": {"region": ["east"]},
+                }
+            }
+        ),
+    )
+
+    authenticator = authenticator_from_environment()
+
+    assert authenticator is not None
+    identity = authenticator.authenticate("Bearer runtime-secret")
+    assert identity is not None
+    assert identity.tenant_id == "tenant_a"
+    assert identity.principal_id == "runtime-user"
+    assert "runtime-secret" not in repr(authenticator.__dict__)
+
+
+def test_authenticator_from_environment_rejects_malformed_json_without_echoing_it(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv(
+        "METRICLEDGER_AUTH_JSON",
+        '{"leaked-token": invalid-json',
+    )
+
+    with pytest.raises(ValueError) as error:
+        authenticator_from_environment()
+
+    assert "METRICLEDGER_AUTH_JSON must be a JSON object" in str(error.value)
+    assert "leaked-token" not in str(error.value)
+
+
+def test_rate_limiter_configuration_is_optional_and_enforces_limit(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("METRICLEDGER_RATE_LIMIT_PER_MINUTE", raising=False)
+    assert rate_limiter_from_environment() is None
+
+    monkeypatch.setenv("METRICLEDGER_RATE_LIMIT_PER_MINUTE", "1")
+    limiter = rate_limiter_from_environment()
+    assert limiter is not None
+    assert limiter.check("tenant:user").allowed is True
+    assert limiter.check("tenant:user").allowed is False
