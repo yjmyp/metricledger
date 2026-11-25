@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+*.duckdb
+*.duckdb.wal
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+node_modules/
+web/dist/
+.env
+.env.local
+*.log
+
