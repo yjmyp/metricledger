@@ -47,11 +47,16 @@ def validate_select(
         raise SqlGuardError("SQL must be a read-only SELECT")
     if statement.args.get("with"):
         raise SqlGuardError("SQL must not contain a CTE")
+    if any(node is not statement for node in statement.find_all(exp.Select)):
+        raise SqlGuardError("SQL must not contain nested SELECTs")
 
-    tables = _names(statement.find_all(exp.Table))
+    table_nodes = list(statement.find_all(exp.Table))
+    if len(table_nodes) != 1 or statement.find(exp.Join):
+        raise SqlGuardError(
+            "SQL must reference exactly one source table and must not contain joins"
+        )
+    tables = _names(table_nodes)
     table_allowlist = {value.lower() for value in allowed_tables}
-    if not tables:
-        raise SqlGuardError("SQL must reference an allowlisted table")
     unknown_tables = sorted(tables - table_allowlist)
     if unknown_tables:
         raise SqlGuardError(f"SQL references a table outside the allowlist: {unknown_tables[0]}")
@@ -66,9 +71,12 @@ def validate_select(
     if any(isinstance(node, exp.Star) for node in statement.walk()):
         raise SqlGuardError("SQL must not select wildcard columns")
 
-    for function in statement.find_all(exp.Anonymous):
-        if function.name.upper() not in _ALLOWED_FUNCTIONS:
-            raise SqlGuardError(f"function is not allowlisted: {function.name}")
+    for function in statement.find_all(exp.Func):
+        if isinstance(function, (exp.Binary, exp.Unary)):
+            continue
+        function_name = function.sql_name().upper()
+        if function_name not in _ALLOWED_FUNCTIONS:
+            raise SqlGuardError(f"function is not allowlisted: {function_name}")
 
     required_table_set = {value.lower() for value in required_tables or ()}
     if not required_table_set.issubset(tables):

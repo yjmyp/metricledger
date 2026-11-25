@@ -1,0 +1,169 @@
+{
+  "version": 1,
+  "description": "Deterministic synthetic scenarios for the local ecommerce semantic bundle.",
+  "principals": {
+    "full": {
+      "principal_id": "eval-full",
+      "allowed_values": {
+        "region": ["east", "west", "north", "south"],
+        "channel": ["app", "web", "mini_program"],
+        "category": ["electronics", "beauty", "home", "fashion"]
+      }
+    },
+    "east_only": {
+      "principal_id": "eval-east-only",
+      "allowed_values": {
+        "region": ["east"],
+        "channel": ["app", "web", "mini_program"],
+        "category": ["electronics", "beauty", "home", "fashion"]
+      }
+    },
+    "east_west": {
+      "principal_id": "eval-east-west",
+      "allowed_values": {
+        "region": ["east", "west"],
+        "channel": ["app", "web", "mini_program"],
+        "category": ["electronics", "beauty", "home", "fashion"]
+      }
+    },
+    "app_only": {
+      "principal_id": "eval-app-only",
+      "allowed_values": {
+        "region": ["east", "west", "north", "south"],
+        "channel": ["app"],
+        "category": ["electronics", "beauty", "home", "fashion"]
+      }
+    }
+  },
+  "groups": [
+    {
+      "category": "supported_investigation",
+      "principal": "full",
+      "as_of": "2026-11-23T23:59:59+08:00",
+      "expected_status": "ADMITTED",
+      "expected_completeness": "COMPLETE",
+      "requires_investigation": true,
+      "partial_questions": [
+        "2026-11-17 到 2026-11-23 支付GMV为什么下降，调查渠道",
+        "2026-11-17 到 2026-11-23 支付GMV为什么下降，调查品类",
+        "2026-11-18 到 2026-11-23 支付GMV下降原因，排查渠道",
+        "2026-11-17 到 2026-11-22 支付GMV下降原因，排查品类"
+      ],
+      "questions": [
+        "2026-11-17 到 2026-11-23 支付GMV为什么下降，调查区域",
+        "2026-11-17 到 2026-11-23 支付GMV为什么下降，调查渠道",
+        "2026-11-17 到 2026-11-23 支付GMV为什么下降，调查品类",
+        "2026-11-17 到 2026-11-23 支付GMV为什么下降，调查区域、渠道、品类",
+        "2026-11-18 到 2026-11-23 支付GMV下降原因，排查区域",
+        "2026-11-18 到 2026-11-23 支付GMV下降原因，排查渠道",
+        "2026-11-17 到 2026-11-22 支付GMV下降原因，排查品类",
+        "2026-11-17 到 2026-11-20 支付GMV下降原因，排查区域、品类",
+        "2026-11-17 到 2026-11-23 支付转化率为什么下降，调查区域",
+        "2026-11-18 到 2026-11-23 支付转化率下降原因，排查渠道",
+        "2026-11-17 到 2026-11-23 订单取消率为什么上升，调查区域",
+        "2026-11-17 到 2026-11-22 订单取消率上升原因，排查品类",
+        "2026-11-17 到 2026-11-21 支付GMV变化原因，调查区域",
+        "2026-11-17 到 2026-11-23 支付转化率变化原因，调查区域、渠道",
+        "2026-11-17 到 2026-11-23 订单取消率变化原因，调查渠道、品类"
+      ]
+    },
+    {
+      "category": "supported_value_or_change",
+      "principal": "full",
+      "as_of": "2026-11-23T23:59:59+08:00",
+      "expected_status": "ADMITTED",
+      "expected_completeness": "COMPLETE",
+      "requires_investigation": false,
+      "questions": [
+        "2026-11-17 到 2026-11-23 支付GMV是多少",
+        "2026-11-17 到 2026-11-23 支付转化率是多少",
+        "2026-11-17 到 2026-11-23 订单取消率是多少",
+        "2026-11-17 到 2026-11-23 支付GMV变化",
+        "2026-11-17 到 2026-11-23 支付转化率变化",
+        "2026-11-17 到 2026-11-23 订单取消率变化",
+        "2026-11-10 到 2026-11-16 支付GMV是多少",
+        "2026-11-10 到 2026-11-16 支付转化率是多少",
+        "2026-11-10 到 2026-11-16 订单取消率是多少",
+        "2026-11-17 到 2026-11-23 支付GMV相比上一周期下降多少",
+        "2026-11-17 到 2026-11-23 支付转化率相比上一周期变化多少",
+        "2026-11-17 到 2026-11-23 订单取消率相比上一周期上升多少"
+      ]
+    },
+    {
+      "category": "scope_refusal",
+      "principal": "east_only",
+      "as_of": "2026-11-23T23:59:59+08:00",
+      "expected_status": "REFUSED",
+      "expected_completeness": "NONE",
+      "requires_investigation": false,
+      "questions": [
+        "2026-11-17 到 2026-11-23 支付GMV是多少",
+        "2026-11-17 到 2026-11-23 支付转化率变化",
+        "2026-11-17 到 2026-11-23 订单取消率为什么上升",
+        "2026-11-10 到 2026-11-16 支付GMV变化",
+        "2026-11-17 到 2026-11-23 支付GMV下降原因，调查渠道",
+        "2026-11-17 到 2026-11-23 支付转化率是多少",
+        "2026-11-10 到 2026-11-16 订单取消率是多少",
+        "2026-11-17 到 2026-11-23 支付GMV为什么下降，调查品类"
+      ]
+    },
+    {
+      "category": "uncovered_period",
+      "principal": "full",
+      "as_of": "2026-11-23T23:59:59+08:00",
+      "expected_status": "UNAVAILABLE",
+      "expected_completeness": "NONE",
+      "requires_investigation": false,
+      "questions": [
+        "2026-12-01 到 2026-12-07 支付GMV是多少",
+        "2026-12-01 到 2026-12-07 支付GMV变化",
+        "2026-09-20 到 2026-09-26 支付转化率是多少",
+        "2026-09-20 到 2026-09-26 订单取消率变化",
+        "2026-10-01 到 2026-10-07 支付GMV变化",
+        "2026-10-01 到 2026-10-07 支付转化率变化",
+        "2026-10-01 到 2026-10-07 订单取消率变化",
+        "2026-10-02 到 2026-10-08 支付GMV为什么下降"
+      ]
+    },
+    {
+      "category": "stale_snapshot",
+      "principal": "full",
+      "as_of": "2026-11-26T23:59:59+08:00",
+      "expected_status": "UNAVAILABLE",
+      "expected_completeness": "NONE",
+      "requires_investigation": false,
+      "questions": [
+        "2026-11-17 到 2026-11-23 支付GMV是多少",
+        "2026-11-17 到 2026-11-23 支付GMV变化",
+        "2026-11-17 到 2026-11-23 支付GMV为什么下降",
+        "2026-11-10 到 2026-11-16 支付转化率是多少",
+        "2026-11-10 到 2026-11-16 支付转化率变化",
+        "2026-11-10 到 2026-11-16 订单取消率是多少",
+        "2026-11-17 到 2026-11-23 订单取消率变化",
+        "2026-11-17 到 2026-11-23 订单取消率为什么上升，调查区域"
+      ]
+    },
+    {
+      "category": "clarification",
+      "principal": "full",
+      "as_of": "2026-11-23T23:59:59+08:00",
+      "expected_status": "CLARIFY",
+      "expected_completeness": "NONE",
+      "requires_investigation": false,
+      "questions": [
+        "支付GMV是多少",
+        "2026-11-17 支付GMV是多少",
+        "2026-11-17 到 2026-11-20 到 2026-11-23 支付GMV是多少",
+        "2026-11-23 到 2026-11-17 支付GMV是多少",
+        "2026-13-01 到 2026-13-07 支付GMV是多少",
+        "2026-11-17 到 2026-11-23 营收是多少",
+        "2026-11-17 到 2026-11-23 成交为什么下降",
+        "最近一周支付GMV是多少",
+        "支付GMV为什么下降",
+        "2026-11-17 到 2026-11-23 是什么情况",
+        "2026-02-30 到 2026-03-02 支付转化率是多少",
+        "2026-11-17 到 2026-11-23 利润是多少"
+      ]
+    }
+  ]
+}

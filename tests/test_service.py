@@ -1,6 +1,7 @@
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
+import duckdb
 import pytest
 
 from metricledger.data import DuckDbEngine
@@ -86,6 +87,20 @@ def test_service_returns_supported_answer_with_audit_sql(
     assert response.answer
 
 
+def test_headline_claim_renders_every_evidence_placeholder(
+    service: AnalysisService,
+    analysis_request: AnalysisRequest,
+):
+    response = service.analyze(analysis_request)
+
+    rendered = response.claims[0].rendered_text
+
+    assert "{evidence:" not in rendered
+    assert "806,400.00" in rendered
+    assert "732,400.00" in rendered
+    assert "-9.18%" in rendered
+
+
 def test_service_rejects_unsafe_scope_without_running_sql(
     service: AnalysisService,
     analysis_request: AnalysisRequest,
@@ -129,3 +144,79 @@ def test_empty_period_is_unavailable_without_becoming_zero(
     assert response.completeness.value == "NONE"
     assert response.answer is None
     assert engine.execution_count == before
+
+
+def test_service_does_not_execute_comparison_beyond_query_budget(
+    service: AnalysisService,
+    analysis_request: AnalysisRequest,
+    engine: DuckDbEngine,
+):
+    before = engine.execution_count
+    one_query_request = analysis_request.model_copy(
+        update={"budget": BudgetPolicy(max_queries=1)}
+    )
+
+    response = service.analyze(one_query_request)
+
+    assert response.admission.status is AdmissionStatus.ADMITTED
+    assert response.budget_usage.queries_used == 1
+    assert engine.execution_count == before + 1
+    assert len(response.sql_audit) == 1
+
+
+def test_zero_ratio_denominator_blocks_headline_claim(
+    service: AnalysisService,
+    analysis_request: AnalysisRequest,
+    database,
+):
+    with duckdb.connect(str(database)) as connection:
+        connection.execute(
+            """
+            UPDATE sales_batch_20261123_2300
+            SET sessions = 0
+            WHERE event_date BETWEEN DATE '2026-11-17' AND DATE '2026-11-23'
+            """
+        )
+    request = analysis_request.model_copy(
+        update={
+            "question": "2026-11-17 到 2026-11-23 支付转化率为什么下降",
+        }
+    )
+
+    response = service.analyze(request)
+
+    assert response.admission.status is AdmissionStatus.ADMITTED
+    assert any(
+        issue.code == "POSITIVE_DENOMINATOR" for issue in response.issues
+    )
+    assert response.claims == []
+    assert response.answer is None
+
+
+def test_zero_baseline_ratio_denominator_blocks_change_claim(
+    service: AnalysisService,
+    analysis_request: AnalysisRequest,
+    database,
+):
+    with duckdb.connect(str(database)) as connection:
+        connection.execute(
+            """
+            UPDATE sales_batch_20261123_2300
+            SET sessions = 0
+            WHERE event_date BETWEEN DATE '2026-11-10' AND DATE '2026-11-16'
+            """
+        )
+    request = analysis_request.model_copy(
+        update={
+            "question": "2026-11-17 到 2026-11-23 支付转化率为什么下降",
+        }
+    )
+
+    response = service.analyze(request)
+
+    assert response.admission.status is AdmissionStatus.ADMITTED
+    assert any(
+        issue.code == "POSITIVE_DENOMINATOR" for issue in response.issues
+    )
+    assert response.claims == []
+    assert response.answer is None

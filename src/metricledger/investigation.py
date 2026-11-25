@@ -283,9 +283,10 @@ class InvestigationService:
                 claim_type=ClaimType.DIAGNOSTIC,
                 template=(
                     f"{top_group} 的{dimension_id}分组当前"
-                    f"{metric.display_name}为 {{evidence:metric_value}}，"
-                    "分子为 {{evidence:numerator_value}}，"
-                    "分母为 {{evidence:denominator_value}}。"
+                    + f"{metric.display_name}为 "
+                    + "{{evidence:metric_value}}，"
+                    + "分子为 {{evidence:numerator_value}}，"
+                    + "分母为 {{evidence:denominator_value}}。"
                 ),
                 evidence_refs=[current.result_id],
                 scope=ClaimScope(
@@ -302,9 +303,10 @@ class InvestigationService:
                 claim_type=ClaimType.DIAGNOSTIC,
                 template=(
                     f"{top_group} 的{dimension_id}分组上一周期"
-                    f"{metric.display_name}为 {{evidence:metric_value}}，"
-                    "分子为 {{evidence:numerator_value}}，"
-                    "分母为 {{evidence:denominator_value}}。"
+                    + f"{metric.display_name}为 "
+                    + "{{evidence:metric_value}}，"
+                    + "分子为 {{evidence:numerator_value}}，"
+                    + "分母为 {{evidence:denominator_value}}。"
                 ),
                 evidence_refs=[baseline.result_id],
                 scope=ClaimScope(

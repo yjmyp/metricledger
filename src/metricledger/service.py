@@ -91,7 +91,7 @@ class AnalysisService:
             context=context,
             period=context.intent.period,
             compiler=compiler,
-            include_ratio_components=False,
+            include_ratio_components=metric.kind is MetricKind.RATIO,
         )
         artifacts = [current]
         audits = [current_audit]
@@ -103,6 +103,32 @@ class AnalysisService:
 
         current_row = current.bounded_rows[0] if current.row_count == 1 else {}
         current_value = current_row.get("metric_value")
+        denominator = current_row.get("denominator_value")
+        if (
+            metric.kind is MetricKind.RATIO
+            and isinstance(denominator, (int, float))
+            and denominator <= 0
+        ):
+            issues.append(
+                AnalysisIssue(
+                    code="POSITIVE_DENOMINATOR",
+                    message="比率分母存在零值",
+                    severity=IssueSeverity.ERROR,
+                    recoverable=False,
+                )
+            )
+            response = AnalysisResponse(
+                analysis_id=context.analysis_id,
+                admission=decision,
+                completeness=Completeness.NONE,
+                answer=None,
+                claims=[],
+                issues=issues,
+                context=context,
+                evidence=artifacts,
+                sql_audit=audits,
+            )
+            return self._persist(response)
         if not isinstance(current_value, (int, float)):
             issues.append(
                 AnalysisIssue(
@@ -126,12 +152,15 @@ class AnalysisService:
             return self._persist(response)
 
         baseline: ResultArtifact | None = None
-        if context.intent.comparison_period is not None:
+        if (
+            context.intent.comparison_period is not None
+            and queries_used < context.budget.max_queries
+        ):
             baseline, baseline_audit, baseline_issue = self._execute_scalar(
                 context=context,
                 period=context.intent.comparison_period,
                 compiler=compiler,
-                include_ratio_components=False,
+                include_ratio_components=metric.kind is MetricKind.RATIO,
             )
             artifacts.append(baseline)
             audits.append(baseline_audit)
@@ -140,6 +169,35 @@ class AnalysisService:
                 issues.append(
                     self._issues_for_codes([baseline_issue])[0]
                 )
+            baseline_row = (
+                baseline.bounded_rows[0] if baseline.row_count == 1 else {}
+            )
+            baseline_denominator = baseline_row.get("denominator_value")
+            if (
+                metric.kind is MetricKind.RATIO
+                and isinstance(baseline_denominator, (int, float))
+                and baseline_denominator <= 0
+            ):
+                issues.append(
+                    AnalysisIssue(
+                        code="POSITIVE_DENOMINATOR",
+                        message="比率分母存在零值",
+                        severity=IssueSeverity.ERROR,
+                        recoverable=False,
+                    )
+                )
+                response = AnalysisResponse(
+                    analysis_id=context.analysis_id,
+                    admission=decision,
+                    completeness=Completeness.NONE,
+                    answer=None,
+                    claims=[],
+                    issues=issues,
+                    context=context,
+                    evidence=artifacts,
+                    sql_audit=audits,
+                )
+                return self._persist(response)
 
         headline_claim = self._headline_claim(
             context=context,
@@ -316,9 +374,10 @@ class AnalysisService:
             analysis_id=context.analysis_id,
             claim_type=ClaimType.CHANGE,
             template=(
-                f"{metric.display_name}从 {{evidence:baseline_value}} "
-                "变为 {{evidence:metric_value}}，"
-                "变化 {{evidence:change_pct}}。"
+                metric.display_name
+                + "从 {{evidence:baseline_value}} "
+                + "变为 {{evidence:metric_value}}，"
+                + "变化 {{evidence:change_pct}}。"
             ),
             evidence_refs=[baseline.result_id, current.result_id],
             scope=ClaimScope(
@@ -377,6 +436,7 @@ class AnalysisService:
             "DIAGNOSTIC_QUERY_FAILED": "诊断查询执行失败",
             "HEADLINE_QUERY_FAILED": "主指标查询执行失败",
             "COMPARISON_PERIOD_REQUIRED": "调查需要可比周期",
+            "POSITIVE_DENOMINATOR": "比率分母存在零值",
         }
         return [
             AnalysisIssue(

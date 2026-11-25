@@ -114,6 +114,53 @@ def test_guard_rejects_external_or_unknown_function_nodes():
         )
 
 
+def test_guard_rejects_typed_function_nodes():
+    with pytest.raises(SqlGuardError, match="function"):
+        validate_select(
+            "SELECT LOWER(event_date) FROM sales_batch_20261123_2300",
+            allowed_tables={"sales_batch_20261123_2300"},
+            allowed_columns={"event_date"},
+        )
+
+
+def test_guard_rejects_nested_selects():
+    with pytest.raises(SqlGuardError, match="nested"):
+        validate_select(
+            (
+                "SELECT SUM(metric_value) FROM "
+                "(SELECT paid_gmv AS metric_value "
+                "FROM sales_batch_20261123_2300) AS nested"
+            ),
+            allowed_tables={"sales_batch_20261123_2300"},
+            allowed_columns={"paid_gmv", "metric_value"},
+        )
+
+
+def test_guard_rejects_joins():
+    with pytest.raises(SqlGuardError, match="join"):
+        validate_select(
+            (
+                "SELECT SUM(f.paid_gmv) FROM sales_batch_20261123_2300 AS f "
+                "JOIN sales_batch_20261123_2300 AS g "
+                "ON f.event_date = g.event_date"
+            ),
+            allowed_tables={"sales_batch_20261123_2300"},
+            allowed_columns={"paid_gmv", "event_date"},
+        )
+
+
+def test_guard_requires_exactly_one_source_table():
+    with pytest.raises(SqlGuardError, match="exactly one"):
+        validate_select(
+            (
+                "SELECT SUM(first_value) "
+                "FROM first_snapshot AS first, second_snapshot AS second"
+            ),
+            allowed_tables={"first_snapshot", "second_snapshot"},
+            allowed_columns={"first_value"},
+        )
+
+
 def test_valid_compiler_sql_passes_guard(compiler: QueryCompiler, intent):
     compiled = compiler.compile(
         intent,

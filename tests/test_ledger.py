@@ -67,3 +67,35 @@ def test_ledger_creates_claim_evidence_edges(ledger, response):
     edge_count = ledger.edge_count(response.analysis_id)
 
     assert edge_count >= len(response.claims)
+
+
+def test_ledger_rejects_replacing_a_saved_analysis(ledger, response):
+    ledger.save(response)
+    tampered = response.model_copy(update={"answer": "replacement"})
+
+    with pytest.raises(ValueError, match="immutable"):
+        ledger.save(tampered)
+
+    loaded = ledger.get(response.analysis_id)
+    assert loaded is not None
+    assert loaded.answer == response.answer
+
+
+def test_ledger_rejects_artifact_replacement_atomically(ledger, response):
+    ledger.save(response)
+    tampered_artifact = response.evidence[0].model_copy(
+        update={"compiled_sql": "SELECT 'replacement'"}
+    )
+    second = response.model_copy(
+        update={
+            "analysis_id": "an_second",
+            "claims": [],
+            "evidence": [tampered_artifact],
+            "sql_audit": [],
+        }
+    )
+
+    with pytest.raises(ValueError, match="immutable"):
+        ledger.save(second)
+
+    assert ledger.get("an_second") is None

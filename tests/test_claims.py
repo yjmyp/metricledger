@@ -117,3 +117,22 @@ def test_unknown_placeholder_cannot_reach_renderer(valid_claim, artifacts):
 
     with pytest.raises(EvidenceViolation, match="placeholder"):
         EvidenceValidator().validate(claim, artifacts)
+
+
+def test_renderer_rejects_single_brace_placeholder(valid_claim, artifacts):
+    validated = EvidenceValidator().validate(valid_claim, artifacts)
+    malformed = validated.model_copy(
+        update={
+            "claim": validated.claim.model_copy(
+                update={
+                    "template": (
+                        "支付 GMV 从 {{evidence:baseline_value}} 变为 "
+                        "{evidence:metric_value}。"
+                    )
+                }
+            )
+        }
+    )
+
+    with pytest.raises(EvidenceViolation, match="unresolved"):
+        ClaimRenderer().render(malformed)

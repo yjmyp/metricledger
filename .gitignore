@@ -3,6 +3,12 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 .ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+
+data/
+output/
 *.duckdb
 *.duckdb.wal
 *.sqlite
@@ -10,8 +16,8 @@ __pycache__/
 *.sqlite-wal
 node_modules/
 web/dist/
+.playwright-cli/
+.tmp-*
 .env
 .env.local
 *.log
-*.egg-info/
-

@@ -67,13 +67,7 @@ def create_app(service: AnalysisService) -> FastAPI:
 
     @app.get("/api/eval/latest")
     def latest_evaluation() -> dict:
-        report = _latest_eval_report()
-        if report is None:
-            return {
-                "status": "NOT_RUN",
-                "message": "No reproducible evaluation report exists.",
-            }
-        return report
+        return _latest_eval_report()
 
     return app
 
@@ -91,12 +85,17 @@ def _response_payload(response: AnalysisResponse) -> dict:
     return payload
 
 
-def _latest_eval_report() -> dict | None:
-    candidates = (
-        Path("eval/latest.json"),
-        Path("eval/eval_report.json"),
-    )
-    for path in candidates:
-        if path.is_file():
-            return json.loads(path.read_text(encoding="utf-8"))
-    return None
+def _latest_eval_report() -> dict:
+    path = Path(__file__).resolve().parents[2] / "eval" / "results.json"
+    if not path.is_file():
+        return {
+            "status": "NOT_RUN",
+            "message": "No reproducible evaluation report exists.",
+        }
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {
+            "status": "INVALID",
+            "message": "The evaluation report could not be read.",
+        }

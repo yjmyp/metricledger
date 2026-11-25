@@ -48,25 +48,46 @@ class SqliteLedger:
     def save(self, response: AnalysisResponse) -> None:
         payload = _canonical_json(response.model_dump(mode="json"))
         with self._connect() as connection:
+            existing = connection.execute(
+                "SELECT payload FROM analyses WHERE analysis_id = ?",
+                (response.analysis_id,),
+            ).fetchone()
+            if existing is not None:
+                if existing[0] == payload:
+                    return
+                raise ValueError("analysis ledger entries are immutable")
+            artifacts_to_insert = []
+            for artifact in response.evidence:
+                artifact_payload = _canonical_json(
+                    artifact.model_dump(mode="json")
+                )
+                artifact_existing = connection.execute(
+                    "SELECT payload FROM result_artifacts WHERE result_id = ?",
+                    (artifact.result_id,),
+                ).fetchone()
+                if artifact_existing is None:
+                    artifacts_to_insert.append(
+                        (artifact, artifact_payload)
+                    )
+                elif artifact_existing[0] != artifact_payload:
+                    raise ValueError("result artifacts are immutable")
             connection.execute(
                 """
                 INSERT INTO analyses(analysis_id, payload)
                 VALUES (?, ?)
-                ON CONFLICT(analysis_id) DO UPDATE SET payload = excluded.payload
                 """,
                 (response.analysis_id, payload),
             )
-            for artifact in response.evidence:
+            for artifact, artifact_payload in artifacts_to_insert:
                 connection.execute(
                     """
                     INSERT INTO result_artifacts(result_id, analysis_id, payload)
                     VALUES (?, ?, ?)
-                    ON CONFLICT(result_id) DO UPDATE SET payload = excluded.payload
                     """,
                     (
                         artifact.result_id,
                         response.analysis_id,
-                        _canonical_json(artifact.model_dump(mode="json")),
+                        artifact_payload,
                     ),
                 )
             for claim in response.claims:

@@ -351,7 +351,10 @@ class ClaimRenderer:
             rendered.append(self._format_value(key, values[key]))
             cursor = match.end()
         rendered.append(self._sanitize_static_text(template[cursor:]))
-        return "".join(rendered).strip()
+        text = "".join(rendered).strip()
+        if "{" in text or "}" in text:
+            raise EvidenceViolation("unresolved claim placeholder")
+        return text
 
     @staticmethod
     def _sanitize_static_text(text: str) -> str:

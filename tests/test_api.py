@@ -99,8 +99,11 @@ def test_health_and_catalog_report_runtime_state(client: TestClient):
     } == {"paid_gmv", "paid_conversion_rate", "cancel_rate"}
 
 
-def test_eval_endpoint_is_explicitly_not_run(client: TestClient):
+def test_eval_endpoint_returns_a_valid_state(client: TestClient):
     response = client.get("/api/eval/latest")
 
     assert response.status_code == 200
-    assert response.json()["status"] == "NOT_RUN"
+    body = response.json()
+    assert body["status"] in {"COMPLETE", "NOT_RUN", "INVALID"}
+    if body["status"] == "COMPLETE":
+        assert body["scenario_count"] >= 60
