@@ -264,6 +264,7 @@ class ResultArtifact(Model):
     analysis_kind: str
     intent_dsl: AnalysisIntent
     compiled_sql: str
+    compiled_parameters: list[str | int | float] = Field(default_factory=list)
     sql_fingerprint: str
     row_count: int = Field(ge=0)
     result_digest: str
@@ -273,6 +274,7 @@ class ResultArtifact(Model):
     semantic_bundle_hash: str
     scope: Scope
     quality_checks: list[QualityCheck] = Field(default_factory=list)
+    elapsed_ms: int = Field(default=0, ge=0)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     expires_at: datetime | None = None
 

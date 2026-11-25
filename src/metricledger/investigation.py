@@ -32,14 +32,16 @@ class InvestigationService:
         engine: DuckDbEngine,
         planner: HypothesisPlanner,
         context: AnalysisContext,
+        initial_artifacts: list[ResultArtifact] | None = None,
+        initial_queries_used: int = 0,
     ):
         self.registry = registry
         self.compiler = compiler
         self.engine = engine
         self.planner = planner
         self.context = context
-        self._queries_used = 0
-        self._artifacts: list[ResultArtifact] = []
+        self._queries_used = initial_queries_used
+        self._artifacts: list[ResultArtifact] = list(initial_artifacts or [])
         self._issue_codes: list[str] = []
 
     def investigate(self) -> InvestigationOutcome:
@@ -192,6 +194,7 @@ class InvestigationService:
             analysis_kind="diagnostic_group",
             intent_dsl=intent,
             compiled_sql=compiled.sql,
+            compiled_parameters=compiled.parameters,
             sql_fingerprint=compiled.fingerprint,
             row_count=rows.row_count,
             result_digest="",
@@ -200,6 +203,7 @@ class InvestigationService:
             snapshot_id=self.context.snapshot_id,
             semantic_bundle_hash=self.context.semantic_bundle_hash,
             scope=self.context.effective_scope,
+            elapsed_ms=rows.elapsed_ms,
         )
         sealed = artifact.model_copy(
             update={"result_digest": result_digest(artifact)}
