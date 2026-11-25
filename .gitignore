@@ -13,4 +13,5 @@ web/dist/
 .env
 .env.local
 *.log
+*.egg-info/
 

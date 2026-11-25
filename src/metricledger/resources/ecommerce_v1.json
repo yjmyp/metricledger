@@ -1,0 +1,96 @@
+{
+  "bundle_id": "ecommerce",
+  "version": "1.0.0",
+  "timezone": "Asia/Shanghai",
+  "allowed_tables": [
+    "sales_batch_20261116_2300",
+    "sales_batch_20261123_2300"
+  ],
+  "allowed_columns": [
+    "event_date",
+    "region",
+    "channel",
+    "category",
+    "paid_orders",
+    "sessions",
+    "canceled_orders",
+    "paid_gmv"
+  ],
+  "dimensions": [
+    {
+      "dimension_id": "region",
+      "display_name": "区域",
+      "column": "region",
+      "values": ["east", "west", "north", "south"]
+    },
+    {
+      "dimension_id": "channel",
+      "display_name": "渠道",
+      "column": "channel",
+      "values": ["app", "web", "mini_program"]
+    },
+    {
+      "dimension_id": "category",
+      "display_name": "品类",
+      "column": "category",
+      "values": ["electronics", "beauty", "home", "fashion"]
+    }
+  ],
+  "metrics": [
+    {
+      "metric_id": "paid_gmv",
+      "display_name": "支付 GMV",
+      "kind": "ADDITIVE",
+      "expression": "SUM(f.paid_gmv)",
+      "time_column": "event_date",
+      "allowed_dimensions": ["region", "channel", "category"],
+      "aliases": ["支付GMV", "成交额", "成交", "GMV"],
+      "freshness_policy_id": "daily",
+      "quality_policy_id": "strict",
+      "sensitivity": "internal"
+    },
+    {
+      "metric_id": "paid_conversion_rate",
+      "display_name": "支付转化率",
+      "kind": "RATIO",
+      "expression": "CAST(SUM(f.paid_orders) AS DOUBLE) / NULLIF(SUM(f.sessions), 0)",
+      "numerator": "SUM(f.paid_orders)",
+      "denominator": "SUM(f.sessions)",
+      "time_column": "event_date",
+      "allowed_dimensions": ["region", "channel", "category"],
+      "aliases": ["支付转化率", "转化率", "成交转化", "成交"],
+      "freshness_policy_id": "daily",
+      "quality_policy_id": "strict",
+      "sensitivity": "internal"
+    },
+    {
+      "metric_id": "cancel_rate",
+      "display_name": "订单取消率",
+      "kind": "RATIO",
+      "expression": "CAST(SUM(f.canceled_orders) AS DOUBLE) / NULLIF(SUM(f.paid_orders), 0)",
+      "numerator": "SUM(f.canceled_orders)",
+      "denominator": "SUM(f.paid_orders)",
+      "time_column": "event_date",
+      "allowed_dimensions": ["region", "channel", "category"],
+      "aliases": ["订单取消率", "取消率", "取消"],
+      "freshness_policy_id": "daily",
+      "quality_policy_id": "strict",
+      "sensitivity": "internal"
+    }
+  ],
+  "freshness_policies": [
+    {
+      "policy_id": "daily",
+      "max_lag_hours": 24,
+      "zero_fill_missing_groups": true
+    }
+  ],
+  "quality_policies": [
+    {
+      "policy_id": "strict",
+      "max_null_rate": 0.001,
+      "max_duplicate_rate": 0.001,
+      "require_positive_denominator": true
+    }
+  ]
+}
