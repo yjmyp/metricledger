@@ -242,6 +242,7 @@ class ClaimScope(Model):
 
 class Claim(Model):
     claim_id: str
+    analysis_id: str
     claim_type: ClaimType
     template: str
     arguments: dict[str, str | int | float | None] = Field(default_factory=dict)
@@ -254,6 +255,7 @@ class Claim(Model):
 class ValidatedClaim(Model):
     claim: Claim
     rendered_text: str
+    evidence_values: dict[str, str | int | float] = Field(default_factory=dict)
 
 
 class ResultArtifact(Model):
