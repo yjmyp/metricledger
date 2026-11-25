@@ -207,14 +207,19 @@ class EvidenceValidator:
                 artifact
                 for artifact in artifacts
                 if artifact.intent_dsl.period == claim.scope.period
-                and artifact.row_count == 1
+                and EvidenceValidator._row_for_claim(artifact, claim) is not None
             ),
             None,
         )
         if current_artifact is not None:
-            current_row = current_artifact.bounded_rows[0]
+            current_row = EvidenceValidator._row_for_claim(
+                current_artifact, claim
+            )
             if isinstance(current_row.get("metric_value"), (int, float)):
                 values["metric_value"] = current_row["metric_value"]
+            for key in ("numerator_value", "denominator_value"):
+                if isinstance(current_row.get(key), (int, float)):
+                    values[key] = current_row[key]
 
         if claim.scope.comparison_period is not None:
             baseline_artifact = next(
@@ -222,14 +227,15 @@ class EvidenceValidator:
                     artifact
                     for artifact in artifacts
                     if artifact.intent_dsl.period == claim.scope.comparison_period
-                    and artifact.row_count == 1
+                    and EvidenceValidator._row_for_claim(artifact, claim) is not None
                 ),
                 None,
             )
             if baseline_artifact is not None:
-                baseline_value = baseline_artifact.bounded_rows[0].get(
-                    "metric_value"
+                baseline_row = EvidenceValidator._row_for_claim(
+                    baseline_artifact, claim
                 )
+                baseline_value = baseline_row.get("metric_value")
                 if isinstance(baseline_value, (int, float)):
                     values["baseline_value"] = baseline_value
 
@@ -244,6 +250,46 @@ class EvidenceValidator:
                     (metric_value - baseline_value) / abs(baseline_value) * 100
                 )
 
+        if claim.claim_type is ClaimType.CONTRIBUTION and claim.scope.group_by:
+            current_grouped = next(
+                (
+                    artifact
+                    for artifact in artifacts
+                    if artifact.intent_dsl.period == claim.scope.period
+                    and artifact.intent_dsl.candidate_dimensions
+                    and artifact.row_count > 0
+                ),
+                None,
+            )
+            baseline_grouped = next(
+                (
+                    artifact
+                    for artifact in artifacts
+                    if artifact.intent_dsl.period == claim.scope.comparison_period
+                    and artifact.intent_dsl.candidate_dimensions
+                    and artifact.row_count > 0
+                ),
+                None,
+            )
+            if current_grouped is not None and baseline_grouped is not None:
+                current_groups = EvidenceValidator._group_metric_values(
+                    current_grouped
+                )
+                baseline_groups = EvidenceValidator._group_metric_values(
+                    baseline_grouped
+                )
+                total_delta = sum(
+                    current_groups.values()
+                ) - sum(baseline_groups.values())
+                group_delta = current_groups.get(
+                    claim.scope.group_value, 0.0
+                ) - baseline_groups.get(claim.scope.group_value, 0.0)
+                values["contribution_abs"] = group_delta
+                if total_delta != 0:
+                    values["contribution_share_pct"] = (
+                        group_delta / total_delta * 100
+                    )
+
         for key in ALLOWED_EVIDENCE_KEYS - set(values):
             distinct = {
                 row.get(key)
@@ -254,6 +300,36 @@ class EvidenceValidator:
             }
             if len(distinct) == 1:
                 values[key] = distinct.pop()
+        return values
+
+    @staticmethod
+    def _row_for_claim(
+        artifact: ResultArtifact,
+        claim: Claim,
+    ) -> dict[str, Any] | None:
+        if claim.scope.group_by is None:
+            return artifact.bounded_rows[0] if artifact.row_count == 1 else None
+        return next(
+            (
+                row
+                for row in artifact.bounded_rows
+                if row.get("dimension_value") == claim.scope.group_value
+            ),
+            None,
+        )
+
+    @staticmethod
+    def _group_metric_values(
+        artifact: ResultArtifact,
+    ) -> dict[str, float]:
+        values: dict[str, float] = {}
+        for row in artifact.bounded_rows:
+            group_value = row.get("dimension_value")
+            metric_value = row.get("metric_value")
+            if isinstance(group_value, str) and isinstance(
+                metric_value, (int, float)
+            ):
+                values[group_value] = float(metric_value)
         return values
 
 

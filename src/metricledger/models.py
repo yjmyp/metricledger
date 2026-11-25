@@ -314,6 +314,26 @@ class Hypothesis(Model):
     priority: int = Field(ge=0, le=2)
 
 
+class ObservationSummary(Model):
+    analysis_id: str
+    metric_id: str
+    metric_kind: MetricKind
+    question_kind: QuestionKind
+    candidate_dimensions: list[str] = Field(default_factory=list)
+    evidence_summaries: list[str] = Field(default_factory=list)
+
+
+class InvestigationOutcome(Model):
+    analysis_id: str
+    completeness: Completeness
+    stop_reason: str
+    queries_used: int = Field(ge=0)
+    top_dimension: str | None = None
+    claims: list[Claim] = Field(default_factory=list)
+    artifacts: list[ResultArtifact] = Field(default_factory=list)
+    issue_codes: list[str] = Field(default_factory=list)
+
+
 class AnalysisRequest(Model):
     question: str = Field(min_length=1, max_length=1_000)
     as_of: datetime

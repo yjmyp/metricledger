@@ -24,6 +24,7 @@ class QueryCompiler:
         scope: Scope,
         *,
         group_by: str | None = None,
+        include_ratio_components: bool = False,
     ) -> CompiledQuery:
         if metric.metric_id != intent.metric_id:
             raise ValueError("intent metric does not match semantic metric")
@@ -35,6 +36,15 @@ class QueryCompiler:
             intent.period.end.isoformat(),
         ]
         selected = [f"{metric.expression} AS metric_value"]
+        if include_ratio_components:
+            if metric.kind.value != "RATIO":
+                raise ValueError("ratio components are only available for ratio metrics")
+            selected.extend(
+                [
+                    f"{metric.numerator} AS numerator_value",
+                    f"{metric.denominator} AS denominator_value",
+                ]
+            )
         group_column = None
         if group_by is not None:
             dimension = self.registry.dimension(group_by)
@@ -69,6 +79,8 @@ class QueryCompiler:
             allowed_columns={
                 *self.registry.bundle.allowed_columns,
                 "metric_value",
+                "numerator_value",
+                "denominator_value",
                 "dimension_value",
             },
             required_tables={snapshot.table_name},

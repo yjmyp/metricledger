@@ -1,5 +1,6 @@
 from datetime import date
 
+import duckdb
 import pytest
 
 from metricledger.compiler import QueryCompiler
@@ -137,3 +138,17 @@ def test_engine_rejects_sql_that_drifted_from_the_fixed_snapshot(
 
     with pytest.raises(ValueError, match="snapshot"):
         engine.execute(drifted, "batch_20261123_2300")
+
+
+def test_snapshot_metadata_period_matches_the_physical_table(database):
+    with duckdb.connect(str(database), read_only=True) as connection:
+        first_date, last_date, row_count = connection.execute(
+            """
+            SELECT min(event_date), max(event_date), count(*)
+            FROM sales_batch_20261123_2300
+            """
+        ).fetchone()
+
+    assert first_date == date(2026, 10, 1)
+    assert last_date == date(2026, 11, 23)
+    assert row_count == 2_592
