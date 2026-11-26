@@ -95,7 +95,12 @@ def test_planner_benchmark_runs_configured_openai_compatible_models(
                             "content": json.dumps({"hypotheses": hypotheses})
                         }
                     }
-                ]
+                ],
+                "usage": {
+                    "prompt_tokens": 10,
+                    "completion_tokens": 2,
+                    "total_tokens": 12,
+                },
             },
         )
 
@@ -109,6 +114,8 @@ def test_planner_benchmark_runs_configured_openai_compatible_models(
     assert report["model"]["case_count"] == 15
     assert report["model"]["fallback_rate"] == 0.0
     assert report["model"]["failure_rate"] == 0.0
+    assert report["model"]["usage_complete_count"] == 15
+    assert report["model"]["planner_tokens"] == 180
 
 
 def test_percentile_uses_nearest_rank_without_interpolation():

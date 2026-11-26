@@ -62,13 +62,15 @@ class InvestigationService:
             ],
             evidence_summaries=[],
         )
-        hypotheses = self.planner.propose(
+        planner_decision = self.planner.propose(
             observation,
             allowed_dimensions,
             remaining_queries=max(
                 0, self.context.budget.max_queries - self._queries_used
             ),
+            round_number=1,
         )
+        hypotheses = planner_decision.hypotheses
 
         claims: list[Claim] = []
         top_dimension: str | None = None

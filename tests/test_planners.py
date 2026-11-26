@@ -4,7 +4,10 @@ import httpx
 import pytest
 
 from metricledger.models import (
+    EvidenceObservation,
+    EvidenceStatus,
     MetricKind,
+    ModelUsage,
     ObservationSummary,
     QuestionKind,
 )
@@ -15,57 +18,85 @@ from metricledger.planners import (
 from metricledger.semantic import SemanticRegistry
 
 
-def observation() -> ObservationSummary:
+def observation(round_number=1, completed=None):
     return ObservationSummary(
         analysis_id="analysis-1",
         metric_id="paid_gmv",
         metric_kind=MetricKind.ADDITIVE,
         question_kind=QuestionKind.INVESTIGATE,
         candidate_dimensions=["region", "channel", "category"],
+        completed_dimensions=completed or [],
+        round_number=round_number,
+        remaining_queries=4,
+        remaining_planner_tokens=1000,
+        evidence_summaries=[
+            EvidenceObservation(
+                dimension_id="region",
+                status=EvidenceStatus.MATERIAL_CHANGE,
+                result_ids=["r1", "r2"],
+                material_change=10.0,
+                concentration_share=0.3,
+                group_count=4,
+                top_group="east",
+            )
+        ],
     )
 
 
-def test_heuristic_planner_preserves_semantic_dimension_order():
+def test_heuristic_planner_returns_decision_and_zero_usage():
     registry = SemanticRegistry.load_default()
 
-    hypotheses = HeuristicHypothesisPlanner().propose(
+    decision = HeuristicHypothesisPlanner().propose(
         observation(),
         list(registry.bundle.dimensions),
         remaining_queries=4,
+        round_number=1,
     )
 
-    assert [hypothesis.dimension_id for hypothesis in hypotheses] == [
+    assert [item.dimension_id for item in decision.hypotheses] == [
         "region",
         "channel",
-        "category",
     ]
+    assert decision.usage is not None
+    assert decision.usage.total_tokens == 0
+    assert decision.attempt.outcome == "HEURISTIC"
+    assert decision.attempt.model_called is False
 
 
-def test_http_planner_filters_unknown_and_duplicate_hypotheses():
+def test_http_planner_filters_completed_unknown_and_duplicate_dimensions():
     def handler(request: httpx.Request) -> httpx.Response:
         body = json.loads(request.content)
-        assert "bounded rows" not in json.dumps(body, ensure_ascii=False)
+        supplied = json.loads(body["messages"][1]["content"])
+        assert [
+            dimension["dimension_id"]
+            for dimension in supplied["dimensions"]
+        ] == ["channel", "category"]
         content = json.dumps(
             {
                 "hypotheses": [
                     {
                         "dimension_id": "region",
-                        "rationale_code": "semantic_default",
+                        "rationale_code": "done",
                         "priority": 0,
-                    },
-                    {
-                        "dimension_id": "invented_dimension",
-                        "rationale_code": "unsafe",
-                        "priority": 0,
-                    },
-                    {
-                        "dimension_id": "region",
-                        "rationale_code": "duplicate",
-                        "priority": 1,
                     },
                     {
                         "dimension_id": "channel",
-                        "rationale_code": "region_contribution",
+                        "rationale_code": "ok",
+                        "priority": 0,
+                    },
+                    {
+                        "dimension_id": "channel",
+                        "rationale_code": "dup",
+                        "priority": 1,
+                    },
+                    {
+                        "dimension_id": "invented",
+                        "rationale_code": "bad",
+                        "priority": 2,
+                    },
+                    {
+                        "dimension_id": "category",
+                        "rationale_code": "ok",
                         "priority": 2,
                     },
                 ]
@@ -73,29 +104,83 @@ def test_http_planner_filters_unknown_and_duplicate_hypotheses():
         )
         return httpx.Response(
             200,
-            json={"choices": [{"message": {"content": content}}]},
+            json={
+                "choices": [{"message": {"content": content}}],
+                "usage": {
+                    "prompt_tokens": 100,
+                    "completion_tokens": 20,
+                    "total_tokens": 120,
+                },
+            },
         )
 
-    client = httpx.Client(transport=httpx.MockTransport(handler))
     planner = OpenAICompatibleHypothesisPlanner(
         base_url="https://planner.example/v1",
         model="test-model",
-        client=client,
+        client=httpx.Client(transport=httpx.MockTransport(handler)),
     )
     registry = SemanticRegistry.load_default()
 
-    hypotheses = planner.propose(
-        observation(),
+    decision = planner.propose(
+        observation(round_number=2, completed=["region"]),
         list(registry.bundle.dimensions),
         remaining_queries=4,
+        round_number=2,
     )
 
-    assert [hypothesis.dimension_id for hypothesis in hypotheses] == [
-        "region",
+    assert [item.dimension_id for item in decision.hypotheses] == [
         "channel",
+        "category",
     ]
-    assert planner.last_trace.outcome == "MODEL_SUCCESS"
-    assert planner.last_trace.fallback_used is False
+    assert decision.usage == ModelUsage(
+        prompt_tokens=100,
+        completion_tokens=20,
+        total_tokens=120,
+    )
+    assert decision.attempt.outcome == "MODEL_SUCCESS"
+    assert decision.attempt.usage_complete is True
+
+
+def test_http_planner_marks_missing_usage_incomplete():
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            json={
+                "choices": [
+                    {
+                        "message": {
+                            "content": json.dumps(
+                                {
+                                    "hypotheses": [
+                                        {
+                                            "dimension_id": "region",
+                                            "rationale_code": "ok",
+                                            "priority": 0,
+                                        }
+                                    ]
+                                }
+                            )
+                        }
+                    }
+                ]
+            },
+        )
+
+    planner = OpenAICompatibleHypothesisPlanner(
+        base_url="https://planner.example/v1",
+        model="test-model",
+        client=httpx.Client(transport=httpx.MockTransport(handler)),
+    )
+
+    decision = planner.propose(
+        observation(),
+        list(SemanticRegistry.load_default().bundle.dimensions),
+        remaining_queries=4,
+        round_number=1,
+    )
+
+    assert decision.usage is None
+    assert decision.attempt.usage_complete is False
 
 
 def test_http_planner_falls_back_when_all_model_choices_are_invalid():
@@ -113,7 +198,14 @@ def test_http_planner_falls_back_when_all_model_choices_are_invalid():
         )
         return httpx.Response(
             200,
-            json={"choices": [{"message": {"content": content}}]},
+            json={
+                "choices": [{"message": {"content": content}}],
+                "usage": {
+                    "prompt_tokens": 10,
+                    "completion_tokens": 2,
+                    "total_tokens": 12,
+                },
+            },
         )
 
     planner = OpenAICompatibleHypothesisPlanner(
@@ -121,22 +213,23 @@ def test_http_planner_falls_back_when_all_model_choices_are_invalid():
         model="test-model",
         client=httpx.Client(transport=httpx.MockTransport(handler)),
     )
-    registry = SemanticRegistry.load_default()
 
-    hypotheses = planner.propose(
+    decision = planner.propose(
         observation(),
-        list(registry.bundle.dimensions),
+        list(SemanticRegistry.load_default().bundle.dimensions),
         remaining_queries=4,
+        round_number=1,
     )
 
-    assert [hypothesis.dimension_id for hypothesis in hypotheses] == [
+    assert [item.dimension_id for item in decision.hypotheses] == [
         "region",
         "channel",
-        "category",
     ]
-    assert planner.last_trace.outcome == "FALLBACK_INVALID_OUTPUT"
-    assert planner.last_trace.fallback_used is True
-    assert planner.last_trace.fallback_reason == "no valid hypotheses"
+    assert decision.attempt.outcome == "FALLBACK_INVALID_OUTPUT"
+    assert decision.attempt.fallback_used is True
+    assert decision.attempt.fallback_reason == "no valid hypotheses"
+    assert decision.usage is not None
+    assert decision.usage.total_tokens == 12
 
 
 @pytest.mark.parametrize(
@@ -161,14 +254,69 @@ def test_http_planner_records_fallback_reason(transport_error, expected):
         model="test-model",
         client=httpx.Client(transport=httpx.MockTransport(handler)),
     )
-    registry = SemanticRegistry.load_default()
 
-    hypotheses = planner.propose(
+    decision = planner.propose(
         observation(),
-        list(registry.bundle.dimensions),
+        list(SemanticRegistry.load_default().bundle.dimensions),
         remaining_queries=4,
+        round_number=1,
     )
 
-    assert hypotheses
-    assert planner.last_trace.outcome == expected
-    assert planner.last_trace.fallback_used is True
+    assert decision.hypotheses
+    assert decision.attempt.outcome == expected
+    assert decision.attempt.fallback_used is True
+    assert decision.attempt.usage_complete is False
+    assert decision.usage is None
+
+
+def test_http_planner_falls_back_on_invalid_json_without_claiming_usage():
+    def handler(request: httpx.Request) -> httpx.Response:
+        return httpx.Response(
+            200,
+            json={"choices": [{"message": {"content": "not-json"}}]},
+        )
+
+    planner = OpenAICompatibleHypothesisPlanner(
+        base_url="https://planner.example/v1",
+        model="test-model",
+        client=httpx.Client(transport=httpx.MockTransport(handler)),
+    )
+
+    decision = planner.propose(
+        observation(),
+        list(SemanticRegistry.load_default().bundle.dimensions),
+        remaining_queries=4,
+        round_number=1,
+    )
+
+    assert decision.hypotheses
+    assert decision.attempt.outcome == "FALLBACK_INVALID_OUTPUT"
+    assert decision.usage is None
+    assert decision.attempt.usage_complete is False
+
+
+def test_http_planner_does_not_call_model_without_query_pair_budget():
+    calls = 0
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        nonlocal calls
+        calls += 1
+        raise AssertionError("model must not be called")
+
+    planner = OpenAICompatibleHypothesisPlanner(
+        base_url="https://planner.example/v1",
+        model="test-model",
+        client=httpx.Client(transport=httpx.MockTransport(handler)),
+    )
+
+    decision = planner.propose(
+        observation(),
+        list(SemanticRegistry.load_default().bundle.dimensions),
+        remaining_queries=1,
+        round_number=1,
+    )
+
+    assert calls == 0
+    assert decision.hypotheses == []
+    assert decision.attempt.outcome == "NOT_RUN"
+    assert decision.attempt.model_called is False

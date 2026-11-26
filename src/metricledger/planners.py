@@ -2,12 +2,18 @@ from __future__ import annotations
 
 import json
 import time
-from dataclasses import dataclass
 from typing import Protocol
 
 import httpx
 
-from .models import DimensionDefinition, Hypothesis, ObservationSummary
+from .models import (
+    DimensionDefinition,
+    Hypothesis,
+    ModelUsage,
+    ObservationSummary,
+    PlannerAttemptTrace,
+    PlannerDecision,
+)
 
 
 class HypothesisPlanner(Protocol):
@@ -17,8 +23,9 @@ class HypothesisPlanner(Protocol):
         allowed_dimensions: list[DimensionDefinition],
         *,
         remaining_queries: int,
-    ) -> list[Hypothesis]:
-        """Return a bounded, semantically valid diagnostic order."""
+        round_number: int,
+    ) -> PlannerDecision:
+        """Return a bounded diagnostic order with an immutable trace."""
 
 
 class HeuristicHypothesisPlanner:
@@ -28,32 +35,38 @@ class HeuristicHypothesisPlanner:
         allowed_dimensions: list[DimensionDefinition],
         *,
         remaining_queries: int,
-    ) -> list[Hypothesis]:
-        candidate_ids = set(observation.candidate_dimensions)
-        limit = min(3, max(0, remaining_queries))
-        hypotheses: list[Hypothesis] = []
-        for dimension in allowed_dimensions:
-            if dimension.dimension_id not in candidate_ids:
-                continue
-            hypotheses.append(
-                Hypothesis(
-                    dimension_id=dimension.dimension_id,
-                    rationale_code="semantic_default",
-                    priority=min(len(hypotheses), 2),
-                )
+        round_number: int,
+    ) -> PlannerDecision:
+        candidates = set(observation.candidate_dimensions)
+        completed = set(observation.completed_dimensions)
+        limit = min(3, max(0, remaining_queries // 2))
+        hypotheses = [
+            Hypothesis(
+                dimension_id=dimension.dimension_id,
+                rationale_code="semantic_default",
+                priority=min(index, 2),
             )
-            if len(hypotheses) == limit:
-                break
-        return hypotheses
-
-
-@dataclass(frozen=True)
-class PlannerTrace:
-    outcome: str
-    fallback_used: bool
-    fallback_reason: str | None
-    latency_ms: float
-    model_called: bool
+            for index, dimension in enumerate(
+                dimension
+                for dimension in allowed_dimensions
+                if dimension.dimension_id in candidates
+                and dimension.dimension_id not in completed
+            )
+        ][:limit]
+        return PlannerDecision(
+            hypotheses=hypotheses,
+            attempt=PlannerAttemptTrace(
+                round_number=round_number,
+                outcome="HEURISTIC",
+                model_called=False,
+                fallback_used=False,
+                usage_complete=True,
+                selected_dimensions=[
+                    hypothesis.dimension_id for hypothesis in hypotheses
+                ],
+            ),
+            usage=ModelUsage(),
+        )
 
 
 class OpenAICompatibleHypothesisPlanner:
@@ -72,13 +85,6 @@ class OpenAICompatibleHypothesisPlanner:
         self.client = client
         self.timeout_ms = timeout_ms
         self._fallback = HeuristicHypothesisPlanner()
-        self.last_trace = PlannerTrace(
-            outcome="NOT_RUN",
-            fallback_used=False,
-            fallback_reason=None,
-            latency_ms=0.0,
-            model_called=False,
-        )
 
     def propose(
         self,
@@ -86,16 +92,23 @@ class OpenAICompatibleHypothesisPlanner:
         allowed_dimensions: list[DimensionDefinition],
         *,
         remaining_queries: int,
-    ) -> list[Hypothesis]:
-        if remaining_queries <= 0:
-            self.last_trace = PlannerTrace(
-                outcome="NOT_RUN",
-                fallback_used=False,
-                fallback_reason="no remaining queries",
-                latency_ms=0.0,
-                model_called=False,
+        round_number: int,
+    ) -> PlannerDecision:
+        available_dimensions = self._available_dimensions(
+            observation,
+            allowed_dimensions,
+        )
+        if remaining_queries < 2:
+            return self._not_run_decision(
+                round_number=round_number,
+                reason="fewer than two remaining queries",
             )
-            return []
+        if not available_dimensions:
+            return self._not_run_decision(
+                round_number=round_number,
+                reason="no remaining dimensions",
+            )
+
         payload = {
             "model": self.model,
             "temperature": 0,
@@ -119,11 +132,10 @@ class OpenAICompatibleHypothesisPlanner:
                                     "dimension_id": dimension.dimension_id,
                                     "display_name": dimension.display_name,
                                 }
-                                for dimension in allowed_dimensions
-                                if dimension.dimension_id
-                                in observation.candidate_dimensions
+                                for dimension in available_dimensions
                             ],
                             "remaining_queries": remaining_queries,
+                            "round_number": round_number,
                         },
                         ensure_ascii=False,
                     ),
@@ -137,88 +149,107 @@ class OpenAICompatibleHypothesisPlanner:
         owns_client = self.client is None
         client = self.client or httpx.Client(timeout=self.timeout_ms / 1000)
         started = time.perf_counter()
-        model_called = False
+        usage: ModelUsage | None = None
         try:
-            model_called = True
             response = client.post(
                 f"{self.base_url}/chat/completions",
                 headers=headers,
                 json=payload,
             )
             response.raise_for_status()
-            content = response.json()["choices"][0]["message"]["content"]
+            body = response.json()
+            usage_payload = body.get("usage")
+            usage = (
+                ModelUsage.model_validate(usage_payload)
+                if usage_payload is not None
+                else None
+            )
+            content = body["choices"][0]["message"]["content"]
             parsed = json.loads(_strip_code_fence(content))
             raw_hypotheses = parsed["hypotheses"]
             if not isinstance(raw_hypotheses, list):
                 raise ValueError("hypotheses must be a list")
-            hypotheses = self._sanitize(
+            hypotheses = self.sanitize(
                 raw_hypotheses,
                 observation,
+                available_dimensions,
                 remaining_queries=remaining_queries,
             )
             if hypotheses:
-                self.last_trace = PlannerTrace(
-                    outcome="MODEL_SUCCESS",
-                    fallback_used=False,
-                    fallback_reason=None,
-                    latency_ms=_elapsed_ms(started),
-                    model_called=True,
+                return PlannerDecision(
+                    hypotheses=hypotheses,
+                    attempt=PlannerAttemptTrace(
+                        round_number=round_number,
+                        outcome="MODEL_SUCCESS",
+                        model_called=True,
+                        latency_ms=_elapsed_ms(started),
+                        usage_complete=usage is not None,
+                        selected_dimensions=[
+                            hypothesis.dimension_id
+                            for hypothesis in hypotheses
+                        ],
+                    ),
+                    usage=usage,
                 )
-                return hypotheses
-            return self._record_fallback(
+            return self._fallback_decision(
                 outcome="FALLBACK_INVALID_OUTPUT",
                 reason="no valid hypotheses",
                 observation=observation,
-                allowed_dimensions=allowed_dimensions,
+                allowed_dimensions=available_dimensions,
                 remaining_queries=remaining_queries,
+                round_number=round_number,
                 started=started,
-                model_called=model_called,
+                usage=usage,
             )
         except httpx.TimeoutException as exc:
-            return self._record_fallback(
+            return self._fallback_decision(
                 outcome="FALLBACK_TIMEOUT",
                 reason=f"timeout: {type(exc).__name__}",
                 observation=observation,
-                allowed_dimensions=allowed_dimensions,
+                allowed_dimensions=available_dimensions,
                 remaining_queries=remaining_queries,
+                round_number=round_number,
                 started=started,
-                model_called=model_called,
+                usage=usage,
             )
         except httpx.HTTPStatusError as exc:
-            return self._record_fallback(
+            return self._fallback_decision(
                 outcome="FALLBACK_HTTP_ERROR",
                 reason=f"http status {exc.response.status_code}",
                 observation=observation,
-                allowed_dimensions=allowed_dimensions,
+                allowed_dimensions=available_dimensions,
                 remaining_queries=remaining_queries,
+                round_number=round_number,
                 started=started,
-                model_called=model_called,
+                usage=usage,
             )
         except httpx.HTTPError as exc:
-            return self._record_fallback(
+            return self._fallback_decision(
                 outcome="FALLBACK_HTTP_ERROR",
                 reason=f"http error: {type(exc).__name__}",
                 observation=observation,
-                allowed_dimensions=allowed_dimensions,
+                allowed_dimensions=available_dimensions,
                 remaining_queries=remaining_queries,
+                round_number=round_number,
                 started=started,
-                model_called=model_called,
+                usage=usage,
             )
-        except (KeyError, TypeError, ValueError, json.JSONDecodeError):
-            return self._record_fallback(
+        except (KeyError, TypeError, ValueError):
+            return self._fallback_decision(
                 outcome="FALLBACK_INVALID_OUTPUT",
                 reason="invalid model response",
                 observation=observation,
-                allowed_dimensions=allowed_dimensions,
+                allowed_dimensions=available_dimensions,
                 remaining_queries=remaining_queries,
+                round_number=round_number,
                 started=started,
-                model_called=model_called,
+                usage=usage,
             )
         finally:
             if owns_client:
                 client.close()
 
-    def _record_fallback(
+    def _fallback_decision(
         self,
         *,
         outcome: str,
@@ -226,31 +257,82 @@ class OpenAICompatibleHypothesisPlanner:
         observation: ObservationSummary,
         allowed_dimensions: list[DimensionDefinition],
         remaining_queries: int,
+        round_number: int,
         started: float,
-        model_called: bool,
-    ) -> list[Hypothesis]:
-        hypotheses = self._fallback.propose(
-                observation,
-                allowed_dimensions,
-                remaining_queries=remaining_queries,
-            )
-        self.last_trace = PlannerTrace(
-            outcome=outcome,
-            fallback_used=True,
-            fallback_reason=reason,
-            latency_ms=_elapsed_ms(started),
-            model_called=model_called,
+        usage: ModelUsage | None,
+    ) -> PlannerDecision:
+        decision = self._fallback.propose(
+            observation,
+            allowed_dimensions,
+            remaining_queries=remaining_queries,
+            round_number=round_number,
         )
-        return hypotheses
+        attempt = decision.attempt.model_copy(
+            update={
+                "outcome": outcome,
+                "model_called": True,
+                "fallback_used": True,
+                "fallback_reason": reason,
+                "latency_ms": _elapsed_ms(started),
+                "usage_complete": usage is not None,
+            }
+        )
+        return decision.model_copy(
+            update={
+                "attempt": attempt,
+                "usage": usage,
+            }
+        )
 
     @staticmethod
-    def _sanitize(
+    def _not_run_decision(
+        *,
+        round_number: int,
+        reason: str,
+    ) -> PlannerDecision:
+        return PlannerDecision(
+            hypotheses=[],
+            attempt=PlannerAttemptTrace(
+                round_number=round_number,
+                outcome="NOT_RUN",
+                model_called=False,
+                fallback_reason=reason,
+                usage_complete=True,
+                selected_dimensions=[],
+            ),
+            usage=ModelUsage(),
+        )
+
+    @staticmethod
+    def _available_dimensions(
+        observation: ObservationSummary,
+        allowed_dimensions: list[DimensionDefinition],
+    ) -> list[DimensionDefinition]:
+        candidates = set(observation.candidate_dimensions)
+        completed = set(observation.completed_dimensions)
+        return [
+            dimension
+            for dimension in allowed_dimensions
+            if dimension.dimension_id in candidates
+            and dimension.dimension_id not in completed
+        ]
+
+    @staticmethod
+    def sanitize(
         raw_hypotheses: list[object],
         observation: ObservationSummary,
+        allowed_dimensions: list[DimensionDefinition],
         *,
         remaining_queries: int,
     ) -> list[Hypothesis]:
-        allowed = set(observation.candidate_dimensions)
+        allowed = {
+            dimension.dimension_id
+            for dimension in OpenAICompatibleHypothesisPlanner._available_dimensions(
+                observation,
+                allowed_dimensions,
+            )
+        }
+        limit = min(3, max(0, remaining_queries // 2))
         seen: set[str] = set()
         hypotheses: list[Hypothesis] = []
         for raw in raw_hypotheses:
@@ -267,7 +349,7 @@ class OpenAICompatibleHypothesisPlanner:
                 continue
             seen.add(hypothesis.dimension_id)
             hypotheses.append(hypothesis)
-            if len(hypotheses) == min(3, remaining_queries):
+            if len(hypotheses) == limit:
                 break
         return hypotheses
 

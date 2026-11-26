@@ -397,6 +397,12 @@ class Hypothesis(Model):
     priority: int = Field(ge=0, le=2)
 
 
+class PlannerDecision(Model):
+    hypotheses: list[Hypothesis] = Field(default_factory=list)
+    attempt: PlannerAttemptTrace
+    usage: ModelUsage | None = None
+
+
 class ObservationSummary(Model):
     analysis_id: str
     metric_id: str

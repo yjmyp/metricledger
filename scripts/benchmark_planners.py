@@ -20,7 +20,6 @@ if str(PROJECT_ROOT) not in os.sys.path:
 from metricledger.evaluation import load_suite
 from metricledger.models import (
     DimensionDefinition,
-    Hypothesis,
     MetricKind,
     ObservationSummary,
     QuestionKind,
@@ -112,6 +111,8 @@ def run_planner_benchmark(
             "fallback_rate": None,
             "outcome_counts": {},
             "fallback_reason_counts": {},
+            "usage_complete_count": 0,
+            "planner_tokens": 0,
         }
 
     report = {
@@ -185,7 +186,9 @@ def _case_for_question(
         metric_kind=metric_kind,
         question_kind=QuestionKind.INVESTIGATE,
         candidate_dimensions=candidate_ids,
-        evidence_summaries=["headline comparison is available"],
+        remaining_queries=6,
+        remaining_planner_tokens=2_000,
+        evidence_summaries=[],
     )
     return observation, dimensions
 
@@ -202,22 +205,26 @@ def _run_planner(
     fallback_count = 0
     outcome_counts: dict[str, int] = {}
     fallback_reasons: dict[str, int] = {}
+    usage_complete_count = 0
+    planner_tokens = 0
     results: list[dict[str, Any]] = []
     for observation, dimensions in cases:
         started = time.perf_counter()
         try:
-            hypotheses = planner.propose(
+            decision = planner.propose(
                 observation,
                 dimensions,
-                remaining_queries=3,
+                remaining_queries=6,
+                round_number=1,
             )
             elapsed_ms = (time.perf_counter() - started) * 1000
+            hypotheses = decision.hypotheses
             failure = not hypotheses
         except Exception as exc:  # pragma: no cover - defensive benchmark path
             elapsed_ms = (time.perf_counter() - started) * 1000
             hypotheses = []
             failure = True
-            trace = None
+            decision = None
             results.append(
                 {
                     "analysis_id": observation.analysis_id,
@@ -228,13 +235,15 @@ def _run_planner(
                 }
             )
         else:
-            trace = getattr(planner, "last_trace", None)
-            if trace is not None:
-                outcome_counts[trace.outcome] = outcome_counts.get(trace.outcome, 0) + 1
-                if trace.fallback_used:
-                    fallback_count += 1
-                    reason = trace.fallback_reason or "unknown"
-                    fallback_reasons[reason] = fallback_reasons.get(reason, 0) + 1
+            trace = decision.attempt
+            outcome_counts[trace.outcome] = outcome_counts.get(trace.outcome, 0) + 1
+            if trace.fallback_used:
+                fallback_count += 1
+                reason = trace.fallback_reason or "unknown"
+                fallback_reasons[reason] = fallback_reasons.get(reason, 0) + 1
+            if decision.usage is not None and trace.usage_complete:
+                usage_complete_count += 1
+                planner_tokens += decision.usage.total_tokens
             results.append(
                 {
                     "analysis_id": observation.analysis_id,
@@ -244,6 +253,12 @@ def _run_planner(
                     "outcome": trace.outcome if trace is not None else None,
                     "fallback_used": (
                         trace.fallback_used if trace is not None else False
+                    ),
+                    "usage_complete": trace.usage_complete,
+                    "planner_tokens": (
+                        decision.usage.total_tokens
+                        if decision.usage is not None
+                        else None
                     ),
                 }
             )
@@ -261,6 +276,8 @@ def _run_planner(
         "latency_ms": _latency_summary(latencies),
         "outcome_counts": outcome_counts,
         "fallback_reason_counts": fallback_reasons,
+        "usage_complete_count": usage_complete_count,
+        "planner_tokens": planner_tokens,
         "results": results,
         "trace_available": include_trace,
     }
@@ -360,6 +377,8 @@ def _metrics_table(metrics: dict[str, Any]) -> str:
             f"| P50 延迟 | {latency['p50']:.3f} ms |",
             f"| P95 延迟 | {latency['p95']:.3f} ms |",
             f"| 最大延迟 | {latency['max']:.3f} ms |",
+            f"| 完整 Token 用量 | {metrics['usage_complete_count']} |",
+            f"| Planner Token | {metrics['planner_tokens']} |",
         ]
     )
 
