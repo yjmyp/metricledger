@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from importlib.metadata import requires
 from pathlib import Path
 
 import pytest
@@ -14,6 +15,19 @@ from scripts.runtime import (
     build_service,
     rate_limiter_from_environment,
 )
+
+
+def test_distribution_declares_httpx_as_runtime_dependency() -> None:
+    runtime_requirements = [
+        requirement.split(";", 1)[0].strip()
+        for requirement in requires("metricledger") or []
+        if "extra ==" not in requirement
+    ]
+
+    assert any(
+        requirement.lower().startswith("httpx")
+        for requirement in runtime_requirements
+    )
 
 
 def test_build_service_uses_heuristic_planner_by_default(

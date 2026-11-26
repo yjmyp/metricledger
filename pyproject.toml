@@ -11,6 +11,7 @@ requires-python = ">=3.10"
 dependencies = [
   "duckdb>=1.1,<2",
   "fastapi>=0.115,<1",
+  "httpx>=0.28,<1",
   "pydantic>=2.10,<3",
   "sqlglot>=26,<27",
   "tzdata>=2024.1",
@@ -19,7 +20,6 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-  "httpx>=0.28,<1",
   "pytest>=8,<9",
   "pytest-cov>=6,<7",
 ]
