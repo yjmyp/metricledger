@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import time
+from collections.abc import Callable
 from uuid import uuid4
 
 from .admission import AdmissionService
 from .claims import ClaimRenderer, EvidenceValidator
 from .compiler import QueryCompiler
+from .context_guard import ContextIntegrityError, ContextIntegrityGuard
 from .data import DuckDbEngine
 from .evidence import result_digest
 from .intent import RuleBasedIntentParser
@@ -15,12 +18,15 @@ from .models import (
     AnalysisIssue,
     AnalysisRequest,
     AnalysisResponse,
+    BudgetUsage,
     Claim,
     ClaimScope,
     ClaimType,
     Completeness,
+    InvestigationTrace,
     IssueSeverity,
     MetricKind,
+    QuestionKind,
     ResultArtifact,
     SqlAudit,
     ValidatedClaim,
@@ -40,6 +46,7 @@ class AnalysisService:
         parser: RuleBasedIntentParser | None = None,
         planner: HypothesisPlanner | None = None,
         ledger=None,
+        clock: Callable[[], float] | None = None,
     ):
         self.registry = registry
         self.snapshots = snapshots
@@ -47,9 +54,12 @@ class AnalysisService:
         self.parser = parser or RuleBasedIntentParser(registry)
         self.planner = planner or HeuristicHypothesisPlanner()
         self.ledger = ledger
+        self.clock = clock or time.monotonic
         self.admission = AdmissionService(registry, snapshots)
+        self.guard = ContextIntegrityGuard(registry, snapshots)
 
     def analyze(self, request: AnalysisRequest) -> AnalysisResponse:
+        started = self.clock()
         parsed = self.parser.parse(request.question, as_of=request.as_of)
         if parsed.status is not AdmissionStatus.ADMITTED or parsed.intent is None:
             response = AnalysisResponse(
@@ -87,6 +97,18 @@ class AnalysisService:
         context = decision.context
         metric = self.registry.metric(context.metric_id)
         compiler = QueryCompiler(self.registry)
+        try:
+            self.guard.verify(context)
+        except ContextIntegrityError:
+            return self._persist(
+                self._context_drift_response(
+                    context=context,
+                    decision=decision,
+                    artifacts=[],
+                    queries_used=0,
+                    started=started,
+                )
+            )
         current, current_audit, current_issue = self._execute_scalar(
             context=context,
             period=context.intent.period,
@@ -156,6 +178,18 @@ class AnalysisService:
             context.intent.comparison_period is not None
             and queries_used < context.budget.max_queries
         ):
+            try:
+                self.guard.verify(context)
+            except ContextIntegrityError:
+                return self._persist(
+                    self._context_drift_response(
+                        context=context,
+                        decision=decision,
+                        artifacts=artifacts,
+                        queries_used=queries_used,
+                        started=started,
+                    )
+                )
             baseline, baseline_audit, baseline_issue = self._execute_scalar(
                 context=context,
                 period=context.intent.comparison_period,
@@ -209,21 +243,51 @@ class AnalysisService:
             claims.append(headline_claim)
 
         completeness = Completeness.COMPLETE
-        if context.intent.question_kind.value == "INVESTIGATE":
-            investigation = InvestigationService(
+        investigation_outcome = None
+        planner_tokens_used: int | None = 0
+        planner_usage_complete = True
+        if context.intent.question_kind is QuestionKind.INVESTIGATE:
+            investigation_outcome = InvestigationService(
                 registry=self.registry,
                 compiler=compiler,
                 engine=self.engine,
                 planner=self.planner,
                 context=context,
+                guard=self.guard,
+                snapshots=self.snapshots,
                 initial_artifacts=artifacts,
                 initial_queries_used=queries_used,
             ).investigate()
-            artifacts = investigation.artifacts
-            claims.extend(investigation.claims)
-            queries_used = investigation.queries_used
-            completeness = investigation.completeness
-            issues.extend(self._issues_for_codes(investigation.issue_codes))
+            artifacts = investigation_outcome.artifacts
+            queries_used = investigation_outcome.queries_used
+            completeness = investigation_outcome.completeness
+            issues.extend(
+                self._issues_for_codes(investigation_outcome.issue_codes)
+            )
+            planner_tokens_used = (
+                investigation_outcome.planner_tokens_used
+            )
+            planner_usage_complete = (
+                investigation_outcome.planner_usage_complete
+            )
+            if (
+                investigation_outcome.investigation is not None
+                and investigation_outcome.investigation.stop_reason
+                == "context_drift"
+            ):
+                return self._persist(
+                    self._context_drift_response(
+                        context=context,
+                        decision=decision,
+                        artifacts=artifacts,
+                        queries_used=queries_used,
+                        investigation=investigation_outcome.investigation,
+                        planner_tokens_used=planner_tokens_used,
+                        planner_usage_complete=planner_usage_complete,
+                        started=started,
+                    )
+                )
+            claims.extend(investigation_outcome.claims)
 
         artifact_map = {
             artifact.result_id: artifact for artifact in artifacts
@@ -239,18 +303,7 @@ class AnalysisService:
                 )
             )
 
-        audits = [
-            SqlAudit(
-                result_id=artifact.result_id,
-                sql=artifact.compiled_sql,
-                parameters=artifact.compiled_parameters,
-                fingerprint=artifact.sql_fingerprint,
-                row_count=artifact.row_count,
-                snapshot_id=artifact.snapshot_id,
-                elapsed_ms=artifact.elapsed_ms,
-            )
-            for artifact in artifacts
-        ]
+        audits = self._audits_for_artifacts(artifacts)
         response = AnalysisResponse(
             analysis_id=context.analysis_id,
             admission=decision,
@@ -262,13 +315,19 @@ class AnalysisService:
             claims=validated_claims,
             issues=issues,
             context=context,
-            budget_usage={
-                "queries_used": queries_used,
-                "planner_tokens_used": 0,
-                "elapsed_ms": sum(audit.elapsed_ms for audit in audits),
-            },
+            budget_usage=BudgetUsage(
+                queries_used=queries_used,
+                planner_tokens_used=planner_tokens_used,
+                planner_usage_complete=planner_usage_complete,
+                elapsed_ms=self._elapsed_ms(started),
+            ),
             evidence=artifacts,
             sql_audit=audits,
+            investigation=(
+                investigation_outcome.investigation
+                if investigation_outcome is not None
+                else None
+            ),
         )
         return self._persist(response)
 
@@ -422,6 +481,64 @@ class AnalysisService:
             self.ledger.save(response)
         return response
 
+    def _context_drift_response(
+        self,
+        *,
+        context,
+        decision: AdmissionDecision,
+        artifacts: list[ResultArtifact],
+        queries_used: int,
+        started: float,
+        investigation: InvestigationTrace | None = None,
+        planner_tokens_used: int | None = 0,
+        planner_usage_complete: bool = True,
+    ) -> AnalysisResponse:
+        return AnalysisResponse(
+            analysis_id=context.analysis_id,
+            admission=decision,
+            completeness=Completeness.NONE,
+            answer=None,
+            claims=[],
+            issues=self._issues_for_codes(["CONTEXT_DRIFT"]),
+            context=context,
+            budget_usage=BudgetUsage(
+                queries_used=queries_used,
+                planner_tokens_used=planner_tokens_used,
+                planner_usage_complete=planner_usage_complete,
+                elapsed_ms=self._elapsed_ms(started),
+            ),
+            evidence=artifacts,
+            sql_audit=self._audits_for_artifacts(artifacts),
+            investigation=(
+                (
+                    investigation
+                    or InvestigationTrace(stop_reason="context_drift")
+                )
+                if context.intent.question_kind is QuestionKind.INVESTIGATE
+                else None
+            ),
+        )
+
+    @staticmethod
+    def _audits_for_artifacts(
+        artifacts: list[ResultArtifact],
+    ) -> list[SqlAudit]:
+        return [
+            SqlAudit(
+                result_id=artifact.result_id,
+                sql=artifact.compiled_sql,
+                parameters=artifact.compiled_parameters,
+                fingerprint=artifact.sql_fingerprint,
+                row_count=artifact.row_count,
+                snapshot_id=artifact.snapshot_id,
+                elapsed_ms=artifact.elapsed_ms,
+            )
+            for artifact in artifacts
+        ]
+
+    def _elapsed_ms(self, started: float) -> int:
+        return max(0, round((self.clock() - started) * 1000))
+
     @staticmethod
     def _issues_for_codes(codes: list[str]) -> list[AnalysisIssue]:
         messages = {
@@ -442,6 +559,7 @@ class AnalysisService:
             "HEADLINE_QUERY_FAILED": "主指标查询执行失败",
             "COMPARISON_PERIOD_REQUIRED": "调查需要可比周期",
             "POSITIVE_DENOMINATOR": "比率分母存在零值",
+            "CONTEXT_DRIFT": "语义包或固定快照在分析期间发生变化",
         }
         return [
             AnalysisIssue(

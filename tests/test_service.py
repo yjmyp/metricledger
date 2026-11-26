@@ -10,6 +10,7 @@ from metricledger.models import (
     AnalysisRequest,
     BudgetPolicy,
     ClaimSupport,
+    Completeness,
     Principal,
 )
 from metricledger.service import AnalysisService
@@ -220,3 +221,80 @@ def test_zero_baseline_ratio_denominator_blocks_change_claim(
     )
     assert response.claims == []
     assert response.answer is None
+
+
+def test_service_exposes_investigation_trace_and_planner_usage(
+    service: AnalysisService,
+    analysis_request: AnalysisRequest,
+):
+    response = service.analyze(
+        analysis_request.model_copy(
+            update={"budget": BudgetPolicy(max_queries=6)}
+        )
+    )
+
+    assert response.investigation is not None
+    assert response.investigation.stop_reason
+    assert len(response.investigation.rounds) >= 1
+    assert response.budget_usage.planner_usage_complete is True
+    assert response.budget_usage.planner_tokens_used == 0
+    assert response.budget_usage.elapsed_ms >= 0
+
+
+def test_scalar_context_drift_blocks_sql_without_an_investigation_trace(
+    service: AnalysisService,
+    analysis_request: AnalysisRequest,
+    engine: DuckDbEngine,
+    monkeypatch,
+):
+    from metricledger.context_guard import ContextIntegrityError
+
+    def drifted(self, context):
+        raise ContextIntegrityError("semantic")
+
+    monkeypatch.setattr(
+        service.guard,
+        "verify",
+        drifted.__get__(service.guard, type(service.guard)),
+    )
+    before = engine.execution_count
+    request = analysis_request.model_copy(
+        update={"question": "2026-11-17 到 2026-11-23 支付GMV是多少"}
+    )
+
+    response = service.analyze(request)
+
+    assert engine.execution_count == before
+    assert response.issues[0].code == "CONTEXT_DRIFT"
+    assert response.investigation is None
+
+
+def test_drift_clears_answer_and_claims_but_keeps_sql_audit(
+    service: AnalysisService,
+    analysis_request: AnalysisRequest,
+    monkeypatch,
+):
+    from metricledger.context_guard import ContextIntegrityError
+
+    verifications = 0
+
+    def drifted(self, context):
+        nonlocal verifications
+        verifications += 1
+        if verifications >= 2:
+            raise ContextIntegrityError("snapshot")
+
+    monkeypatch.setattr(
+        service.guard,
+        "verify",
+        drifted.__get__(service.guard, type(service.guard)),
+    )
+
+    response = service.analyze(analysis_request)
+
+    assert response.completeness is Completeness.NONE
+    assert response.answer is None
+    assert response.claims == []
+    assert any(issue.code == "CONTEXT_DRIFT" for issue in response.issues)
+    assert response.sql_audit
+    assert response.investigation.stop_reason == "context_drift"

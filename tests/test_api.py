@@ -135,3 +135,22 @@ def test_eval_endpoint_reads_configured_report_path(
     body = configured_client.get("/api/eval/latest").json()
     assert body["status"] == "COMPLETE"
     assert body["scenario_count"] == 63
+
+
+def test_api_serializes_investigation_trace(
+    client: TestClient,
+    request_payload: dict,
+):
+    response = client.post(
+        "/api/analyses",
+        json={
+            **request_payload,
+            "budget": {"max_queries": 6},
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["investigation"]["rounds"]
+    assert body["investigation"]["stop_reason"]
+    assert "planner_usage_complete" in body["budget_usage"]
