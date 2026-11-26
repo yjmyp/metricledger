@@ -100,7 +100,9 @@ npm --prefix web audit --audit-level=high
 
 ## Container And Deployment
 
-本机没有安装 `docker` 命令，因此本机 `docker version` 和 Compose 启动为 `NOT_RUN`。容器交付只能由 GitHub Actions 的 `container` job 验证；在真实 job 成功前，不把容器冒烟记录为已通过。
+- [CI run 45769453722](https://github.com/yjmyp/metricledger/actions/runs/45769453722) 的 `backend`、`frontend`、`config`、`container` 四个 job 全部成功。
+- `container` job 真实构建并启动了生产镜像，完成健康检查、业务冒烟、planner/Token/调查指标检查。
+- 本机没有安装 `docker` 命令，因此本机 `docker version` 和 Compose 启动为 `NOT_RUN`。
 
 长期公网托管本轮没有重新验证，也没有新增托管凭据；该部分仍为 `NOT_RUN`。
 
