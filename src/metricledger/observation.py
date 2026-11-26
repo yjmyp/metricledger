@@ -49,6 +49,7 @@ class ObservationBuilder:
         remaining_queries: int,
         remaining_planner_tokens: int | None,
         sensitive_dimensions: set[str] | None = None,
+        candidate_dimensions: list[str] | None = None,
     ) -> InvestigationObservation:
         sensitive = sensitive_dimensions or set()
         evidence = [
@@ -74,7 +75,11 @@ class ObservationBuilder:
             metric_id=context.metric_id,
             metric_kind=self.metric_kind,
             question_kind=context.intent.question_kind,
-            candidate_dimensions=list(context.intent.candidate_dimensions),
+            candidate_dimensions=list(
+                context.intent.candidate_dimensions
+                if candidate_dimensions is None
+                else candidate_dimensions
+            ),
             completed_dimensions=list(completed_dimensions),
             remaining_queries=remaining_queries,
             remaining_planner_tokens=remaining_planner_tokens,

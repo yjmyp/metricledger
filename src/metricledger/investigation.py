@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+from dataclasses import dataclass
 from uuid import uuid4
 
 from .claims import EvidenceValidator
 from .compiler import QueryCompiler
+from .context_guard import ContextIntegrityError, ContextIntegrityGuard
 from .data import DuckDbEngine, QueryExecutionError
 from .evidence import result_digest
 from .models import (
@@ -13,14 +15,28 @@ from .models import (
     ClaimType,
     Completeness,
     DateRange,
+    EvidenceStatus,
+    InvestigationRoundTrace,
     InvestigationOutcome,
+    InvestigationStepTrace,
+    InvestigationTrace,
     MetricKind,
-    ObservationSummary,
+    PlannerAttemptTrace,
     ResultArtifact,
     SnapshotRecord,
 )
-from .planners import HypothesisPlanner
+from .observation import ObservationBuilder
+from .planners import HeuristicHypothesisPlanner, HypothesisPlanner
 from .semantic import SemanticRegistry
+from .snapshots import SnapshotRepository
+
+
+@dataclass(frozen=True)
+class _Diagnosis:
+    step: InvestigationStepTrace
+    claims: list[Claim]
+    top_dimension: str | None
+    stop_reason: str | None
 
 
 class InvestigationService:
@@ -32,6 +48,9 @@ class InvestigationService:
         engine: DuckDbEngine,
         planner: HypothesisPlanner,
         context: AnalysisContext,
+        guard: ContextIntegrityGuard | None = None,
+        snapshots: SnapshotRepository | None = None,
+        fallback_planner: HypothesisPlanner | None = None,
         initial_artifacts: list[ResultArtifact] | None = None,
         initial_queries_used: int = 0,
     ):
@@ -39,110 +58,186 @@ class InvestigationService:
         self.compiler = compiler
         self.engine = engine
         self.planner = planner
+        self.fallback_planner = fallback_planner or HeuristicHypothesisPlanner()
         self.context = context
+        self.guard = guard
+        self.snapshots = snapshots
         self._queries_used = initial_queries_used
         self._artifacts: list[ResultArtifact] = list(initial_artifacts or [])
         self._issue_codes: list[str] = []
 
     def investigate(self) -> InvestigationOutcome:
         metric = self.registry.metric(self.context.metric_id)
-        allowed_dimensions = [
-            self.registry.dimension(dimension_id)
-            for dimension_id in metric.allowed_dimensions
-            if not self.context.intent.candidate_dimensions
-            or dimension_id in self.context.intent.candidate_dimensions
-        ]
-        observation = ObservationSummary(
-            analysis_id=self.context.analysis_id,
-            metric_id=metric.metric_id,
-            metric_kind=metric.kind,
-            question_kind=self.context.intent.question_kind,
-            candidate_dimensions=[
-                dimension.dimension_id for dimension in allowed_dimensions
-            ],
-            evidence_summaries=[],
-        )
-        planner_decision = self.planner.propose(
-            observation,
-            allowed_dimensions,
-            remaining_queries=max(
-                0, self.context.budget.max_queries - self._queries_used
-            ),
-            round_number=1,
-        )
-        hypotheses = planner_decision.hypotheses
-
+        candidates = self._candidate_dimensions(metric)
+        sensitive_dimensions = {
+            dimension.dimension_id
+            for dimension in candidates
+            if dimension.sensitive
+        }
+        completed: list[str] = []
+        all_steps: list[InvestigationStepTrace] = []
+        rounds: list[InvestigationRoundTrace] = []
         claims: list[Claim] = []
         top_dimension: str | None = None
-        stop_reason = "budget_exhausted"
+        planner_tokens_used: int | None = 0
+        planner_usage_complete = True
+        stop_reason = "no_remaining_candidates"
         completeness = Completeness.NONE
 
-        for hypothesis in hypotheses:
-            if self._remaining_queries() <= 0:
+        for round_number in range(
+            1, self.context.budget.max_planner_rounds + 1
+        ):
+            remaining = [
+                dimension
+                for dimension in candidates
+                if dimension.dimension_id not in completed
+            ]
+            if not remaining:
+                stop_reason = "all_candidates_observed"
                 break
-
-            current = self._execute_grouped(
-                hypothesis.dimension_id,
-                self.context.intent.period,
-                include_ratio_components=metric.kind is MetricKind.RATIO,
-            )
-            if current is None:
-                break
-            if self.context.intent.comparison_period is None:
-                self._issue_codes.append("COMPARISON_PERIOD_REQUIRED")
-                stop_reason = "comparison_unavailable"
-                completeness = Completeness.PARTIAL
-                break
-
-            baseline = self._execute_grouped(
-                hypothesis.dimension_id,
-                self.context.intent.comparison_period,
-                include_ratio_components=metric.kind is MetricKind.RATIO,
-            )
-            if baseline is None:
+            if self._remaining_queries() < 2:
+                self._add_issue("BUDGET_EXHAUSTED")
                 stop_reason = "budget_exhausted"
-                completeness = Completeness.PARTIAL
-                break
-
-            if metric.kind is MetricKind.ADDITIVE:
-                contribution = self._additive_contribution(
-                    dimension_id=hypothesis.dimension_id,
-                    current=current,
-                    baseline=baseline,
-                )
-                if contribution is None:
-                    stop_reason = "no_material_change"
-                    completeness = Completeness.PARTIAL
-                    break
-                claim, concentration = contribution
-                claims.append(claim)
-                top_dimension = hypothesis.dimension_id
-                if concentration >= 0.5:
-                    stop_reason = "concentrated_contribution"
-                    completeness = Completeness.COMPLETE
-                    break
-            else:
-                claims.extend(
-                    self._ratio_diagnostics(
-                        dimension_id=hypothesis.dimension_id,
-                        current=current,
-                        baseline=baseline,
+                rounds.append(
+                    self._not_run_round(
+                        metric=metric,
+                        round_number=round_number,
+                        all_steps=all_steps,
+                        completed=completed,
+                        sensitive_dimensions=sensitive_dimensions,
+                        planner_usage_complete=planner_usage_complete,
+                        planner_tokens_used=planner_tokens_used,
+                        reason="fewer than two remaining queries",
                     )
                 )
-                top_dimension = hypothesis.dimension_id
-                stop_reason = "ratio_diagnostic_complete"
-                completeness = Completeness.COMPLETE
                 break
-        else:
-            if self._queries_used > 0:
-                completeness = Completeness.PARTIAL
-                self._issue_codes.append("BUDGET_EXHAUSTED")
+            if (
+                planner_usage_complete
+                and planner_tokens_used is not None
+                and planner_tokens_used
+                >= self.context.budget.max_planner_tokens
+            ):
+                self._add_issue("PLANNER_TOKEN_BUDGET_EXHAUSTED")
+                stop_reason = "planner_token_budget_exhausted"
+                rounds.append(
+                    self._not_run_round(
+                        metric=metric,
+                        round_number=round_number,
+                        all_steps=all_steps,
+                        completed=completed,
+                        sensitive_dimensions=sensitive_dimensions,
+                        planner_usage_complete=planner_usage_complete,
+                        planner_tokens_used=planner_tokens_used,
+                        reason="planner token budget exhausted",
+                    )
+                )
+                break
+            if self._context_drifted():
+                stop_reason = "context_drift"
+                break
 
-        if self._remaining_queries() <= 0 and completeness is not Completeness.COMPLETE:
-            stop_reason = "budget_exhausted"
+            observation = self._build_observation(
+                metric=metric,
+                round_number=round_number,
+                all_steps=all_steps,
+                completed=completed,
+                sensitive_dimensions=sensitive_dimensions,
+                planner_usage_complete=planner_usage_complete,
+                planner_tokens_used=planner_tokens_used,
+            )
+            decision = self._propose(
+                observation=observation,
+                remaining=remaining,
+                round_number=round_number,
+                planner_usage_complete=planner_usage_complete,
+            )
+            round_steps: list[InvestigationStepTrace] = []
+            round_complete = False
+            for hypothesis in decision.hypotheses[:3]:
+                if hypothesis.dimension_id not in {
+                    dimension.dimension_id for dimension in remaining
+                }:
+                    continue
+                if hypothesis.dimension_id in completed:
+                    continue
+                if self._remaining_queries() < 2:
+                    self._add_issue("BUDGET_EXHAUSTED")
+                    stop_reason = "budget_exhausted"
+                    break
+
+                result = self._diagnose(
+                    dimension_id=hypothesis.dimension_id,
+                    round_number=round_number,
+                )
+                round_steps.append(result.step)
+                all_steps.append(result.step)
+                if result.stop_reason != "context_drift":
+                    completed.append(hypothesis.dimension_id)
+                claims.extend(result.claims)
+                if result.top_dimension is not None:
+                    top_dimension = result.top_dimension
+                if result.stop_reason is not None:
+                    stop_reason = result.stop_reason
+                    round_complete = True
+                    break
+
+            if decision.usage is not None and planner_usage_complete:
+                planner_tokens_used = (
+                    (planner_tokens_used or 0) + decision.usage.total_tokens
+                )
+            elif (
+                decision.usage is None
+                or not decision.attempt.usage_complete
+            ):
+                planner_usage_complete = False
+                planner_tokens_used = None
+
+            rounds.append(
+                InvestigationRoundTrace(
+                    round_number=round_number,
+                    observation=observation,
+                    planner=decision.attempt,
+                    steps=round_steps,
+                )
+            )
+            if round_complete or stop_reason == "context_drift":
+                break
+
+        remaining_dimensions = [
+            dimension.dimension_id
+            for dimension in candidates
+            if dimension.dimension_id not in completed
+        ]
+        if stop_reason in {
+            "concentrated_contribution",
+            "ratio_diagnostic_complete",
+        }:
+            completeness = Completeness.COMPLETE
+        elif stop_reason == "context_drift":
+            claims = []
+            completeness = Completeness.NONE
+        elif completed:
             completeness = Completeness.PARTIAL
-            if "BUDGET_EXHAUSTED" not in self._issue_codes:
-                self._issue_codes.append("BUDGET_EXHAUSTED")
+
+        if (
+            stop_reason == "no_remaining_candidates"
+            and len(rounds) == self.context.budget.max_planner_rounds
+        ):
+            stop_reason = "planner_round_limit"
+
+        trace = InvestigationTrace(
+            rounds=rounds,
+            completed_dimensions=completed,
+            remaining_dimensions=remaining_dimensions,
+            stop_reason=stop_reason,
+            planner_fallback_used=(
+                not planner_usage_complete
+                or any(
+                    round_trace.planner.fallback_used
+                    for round_trace in rounds
+                )
+            ),
+        )
 
         return InvestigationOutcome(
             analysis_id=self.context.analysis_id,
@@ -153,6 +248,204 @@ class InvestigationService:
             claims=claims,
             artifacts=self._artifacts,
             issue_codes=self._issue_codes,
+            planner_tokens_used=planner_tokens_used,
+            planner_usage_complete=planner_usage_complete,
+            investigation=trace,
+        )
+
+    def _diagnose(
+        self,
+        *,
+        dimension_id: str,
+        round_number: int,
+    ) -> _Diagnosis:
+        metric = self.registry.metric(self.context.metric_id)
+        if self._context_drifted():
+            return self._drift_diagnosis(
+                round_number=round_number,
+                dimension_id=dimension_id,
+            )
+
+        current = self._execute_grouped(
+            dimension_id,
+            self.context.intent.period,
+            include_ratio_components=metric.kind is MetricKind.RATIO,
+        )
+        if current is None:
+            self._add_issue("DIAGNOSTIC_QUERY_FAILED")
+            return _Diagnosis(
+                step=self._step(
+                    round_number=round_number,
+                    dimension_id=dimension_id,
+                    status=EvidenceStatus.QUERY_FAILED,
+                    result_ids=[],
+                    material_change=None,
+                    concentration_share=None,
+                    group_count=0,
+                    top_group=None,
+                    issue_codes=["DIAGNOSTIC_QUERY_FAILED"],
+                ),
+                claims=[],
+                top_dimension=None,
+                stop_reason=None,
+            )
+
+        if self.context.intent.comparison_period is None:
+            self._add_issue("COMPARISON_PERIOD_REQUIRED")
+            return _Diagnosis(
+                step=self._step(
+                    round_number=round_number,
+                    dimension_id=dimension_id,
+                    status=EvidenceStatus.NO_COMPARABLE_GROUPS,
+                    result_ids=[current.result_id],
+                    material_change=None,
+                    concentration_share=None,
+                    group_count=current.row_count,
+                    top_group=None,
+                    issue_codes=["COMPARISON_PERIOD_REQUIRED"],
+                ),
+                claims=[],
+                top_dimension=None,
+                stop_reason="comparison_unavailable",
+            )
+
+        if self._context_drifted():
+            return self._drift_diagnosis(
+                round_number=round_number,
+                dimension_id=dimension_id,
+                result_ids=[current.result_id],
+            )
+
+        baseline = self._execute_grouped(
+            dimension_id,
+            self.context.intent.comparison_period,
+            include_ratio_components=metric.kind is MetricKind.RATIO,
+        )
+        if baseline is None:
+            self._add_issue("DIAGNOSTIC_QUERY_FAILED")
+            return _Diagnosis(
+                step=self._step(
+                    round_number=round_number,
+                    dimension_id=dimension_id,
+                    status=EvidenceStatus.QUERY_FAILED,
+                    result_ids=[current.result_id],
+                    material_change=None,
+                    concentration_share=None,
+                    group_count=current.row_count,
+                    top_group=None,
+                    issue_codes=["DIAGNOSTIC_QUERY_FAILED"],
+                ),
+                claims=[],
+                top_dimension=None,
+                stop_reason=None,
+            )
+
+        if metric.kind is MetricKind.RATIO:
+            current_groups = self._group_values(current)
+            baseline_groups = self._group_values(baseline)
+            common_groups = sorted(
+                set(current_groups) & set(baseline_groups)
+            )
+            if not common_groups:
+                return _Diagnosis(
+                    step=self._step(
+                        round_number=round_number,
+                        dimension_id=dimension_id,
+                        status=EvidenceStatus.NO_COMPARABLE_GROUPS,
+                        result_ids=[
+                            baseline.result_id,
+                            current.result_id,
+                        ],
+                        material_change=None,
+                        concentration_share=None,
+                        group_count=0,
+                        top_group=None,
+                        issue_codes=[],
+                    ),
+                    claims=[],
+                    top_dimension=None,
+                    stop_reason=None,
+                )
+            top_group = max(
+                common_groups,
+                key=lambda group: abs(
+                    current_groups[group] - baseline_groups[group]
+                ),
+            )
+            claims = self._ratio_diagnostics(
+                dimension_id=dimension_id,
+                current=current,
+                baseline=baseline,
+            )
+            return _Diagnosis(
+                step=self._step(
+                    round_number=round_number,
+                    dimension_id=dimension_id,
+                    status=EvidenceStatus.MATERIAL_CHANGE,
+                    result_ids=[baseline.result_id, current.result_id],
+                    material_change=abs(
+                        current_groups[top_group] - baseline_groups[top_group]
+                    ),
+                    concentration_share=None,
+                    group_count=len(common_groups),
+                    top_group=top_group,
+                    issue_codes=[],
+                ),
+                claims=claims,
+                top_dimension=dimension_id,
+                stop_reason="ratio_diagnostic_complete",
+            )
+
+        current_groups = self._group_values(current)
+        baseline_groups = self._group_values(baseline)
+        all_groups = sorted(set(current_groups) | set(baseline_groups))
+        deltas = {
+            group: current_groups.get(group, 0.0)
+            - baseline_groups.get(group, 0.0)
+            for group in all_groups
+        }
+        total_absolute_delta = sum(abs(value) for value in deltas.values())
+        contribution = self._additive_contribution(
+            dimension_id=dimension_id,
+            current=current,
+            baseline=baseline,
+        )
+        if contribution is None:
+            return _Diagnosis(
+                step=self._step(
+                    round_number=round_number,
+                    dimension_id=dimension_id,
+                    status=EvidenceStatus.NO_MATERIAL_CHANGE,
+                    result_ids=[baseline.result_id, current.result_id],
+                    material_change=total_absolute_delta,
+                    concentration_share=0.0,
+                    group_count=len(all_groups),
+                    top_group=None,
+                    issue_codes=[],
+                ),
+                claims=[],
+                top_dimension=None,
+                stop_reason=None,
+            )
+        claim, concentration = contribution
+        stop_reason = (
+            "concentrated_contribution" if concentration >= 0.5 else None
+        )
+        return _Diagnosis(
+            step=self._step(
+                round_number=round_number,
+                dimension_id=dimension_id,
+                status=EvidenceStatus.MATERIAL_CHANGE,
+                result_ids=[baseline.result_id, current.result_id],
+                material_change=total_absolute_delta,
+                concentration_share=concentration,
+                group_count=len(all_groups),
+                top_group=claim.scope.group_value,
+                issue_codes=[],
+            ),
+            claims=[claim],
+            top_dimension=dimension_id,
+            stop_reason=stop_reason,
         )
 
     def _execute_grouped(
@@ -187,7 +480,6 @@ class InvestigationService:
                 self.context.snapshot_id,
             )
         except (QueryExecutionError, ValueError):
-            self._issue_codes.append("DIAGNOSTIC_QUERY_FAILED")
             return None
 
         artifact = ResultArtifact(
@@ -369,3 +661,160 @@ class InvestigationService:
 
     def _remaining_queries(self) -> int:
         return max(0, self.context.budget.max_queries - self._queries_used)
+
+    def _candidate_dimensions(self, metric) -> list:
+        return [
+            self.registry.dimension(dimension_id)
+            for dimension_id in metric.allowed_dimensions
+            if not self.context.intent.candidate_dimensions
+            or dimension_id in self.context.intent.candidate_dimensions
+        ]
+
+    def _build_observation(
+        self,
+        *,
+        metric,
+        round_number: int,
+        all_steps: list[InvestigationStepTrace],
+        completed: list[str],
+        sensitive_dimensions: set[str],
+        planner_usage_complete: bool,
+        planner_tokens_used: int | None,
+    ):
+        remaining_planner_tokens = (
+            max(
+                0,
+                self.context.budget.max_planner_tokens
+                - (planner_tokens_used or 0),
+            )
+            if planner_usage_complete and planner_tokens_used is not None
+            else None
+        )
+        return ObservationBuilder(metric.kind).build(
+            self.context,
+            round_number=round_number,
+            steps=all_steps,
+            completed_dimensions=completed,
+            remaining_queries=self._remaining_queries(),
+            remaining_planner_tokens=remaining_planner_tokens,
+            sensitive_dimensions=sensitive_dimensions,
+            candidate_dimensions=[
+                dimension.dimension_id
+                for dimension in self._candidate_dimensions(metric)
+            ],
+        )
+
+    def _not_run_round(
+        self,
+        *,
+        metric,
+        round_number: int,
+        all_steps: list[InvestigationStepTrace],
+        completed: list[str],
+        sensitive_dimensions: set[str],
+        planner_usage_complete: bool,
+        planner_tokens_used: int | None,
+        reason: str,
+    ) -> InvestigationRoundTrace:
+        observation = self._build_observation(
+            metric=metric,
+            round_number=round_number,
+            all_steps=all_steps,
+            completed=completed,
+            sensitive_dimensions=sensitive_dimensions,
+            planner_usage_complete=planner_usage_complete,
+            planner_tokens_used=planner_tokens_used,
+        )
+        return InvestigationRoundTrace(
+            round_number=round_number,
+            observation=observation,
+            planner=PlannerAttemptTrace(
+                round_number=round_number,
+                outcome="NOT_RUN",
+                model_called=False,
+                fallback_reason=reason,
+                usage_complete=planner_usage_complete,
+                selected_dimensions=[],
+            ),
+            steps=[],
+        )
+
+    def _propose(
+        self,
+        *,
+        observation,
+        remaining: list,
+        round_number: int,
+        planner_usage_complete: bool,
+    ):
+        planner = self.planner if planner_usage_complete else self.fallback_planner
+        return planner.propose(
+            observation,
+            remaining,
+            remaining_queries=self._remaining_queries(),
+            round_number=round_number,
+        )
+
+    def _context_drifted(self) -> bool:
+        if self.guard is None:
+            return False
+        try:
+            self.guard.verify(self.context)
+        except ContextIntegrityError:
+            self._add_issue("CONTEXT_DRIFT")
+            return True
+        return False
+
+    def _drift_diagnosis(
+        self,
+        *,
+        round_number: int,
+        dimension_id: str,
+        result_ids: list[str] | None = None,
+    ) -> _Diagnosis:
+        self._add_issue("CONTEXT_DRIFT")
+        return _Diagnosis(
+            step=self._step(
+                round_number=round_number,
+                dimension_id=dimension_id,
+                status=EvidenceStatus.NO_MATERIAL_CHANGE,
+                result_ids=list(result_ids or []),
+                material_change=None,
+                concentration_share=None,
+                group_count=0,
+                top_group=None,
+                issue_codes=["CONTEXT_DRIFT"],
+            ),
+            claims=[],
+            top_dimension=None,
+            stop_reason="context_drift",
+        )
+
+    @staticmethod
+    def _step(
+        *,
+        round_number: int,
+        dimension_id: str,
+        status: EvidenceStatus,
+        result_ids: list[str],
+        material_change: float | None,
+        concentration_share: float | None,
+        group_count: int,
+        top_group: str | None,
+        issue_codes: list[str],
+    ) -> InvestigationStepTrace:
+        return InvestigationStepTrace(
+            round_number=round_number,
+            dimension_id=dimension_id,
+            status=status,
+            result_ids=result_ids,
+            material_change=material_change,
+            concentration_share=concentration_share,
+            group_count=group_count,
+            top_group=top_group,
+            issue_codes=issue_codes,
+        )
+
+    def _add_issue(self, code: str) -> None:
+        if code not in self._issue_codes:
+            self._issue_codes.append(code)
