@@ -53,6 +53,13 @@ class QuestionKind(WireEnum):
     INVESTIGATE = "INVESTIGATE"
 
 
+class EvidenceStatus(WireEnum):
+    MATERIAL_CHANGE = "MATERIAL_CHANGE"
+    NO_MATERIAL_CHANGE = "NO_MATERIAL_CHANGE"
+    NO_COMPARABLE_GROUPS = "NO_COMPARABLE_GROUPS"
+    QUERY_FAILED = "QUERY_FAILED"
+
+
 class IssueSeverity(WireEnum):
     INFO = "INFO"
     WARNING = "WARNING"
@@ -88,12 +95,82 @@ class BudgetPolicy(Model):
     max_queries: int = Field(default=4, ge=1, le=10)
     timeout_ms: int = Field(default=10_000, ge=100, le=60_000)
     max_planner_tokens: int = Field(default=2_000, ge=0, le=20_000)
+    max_planner_rounds: int = Field(default=2, ge=1, le=2)
 
 
 class BudgetUsage(Model):
     queries_used: int = 0
-    planner_tokens_used: int = 0
+    planner_tokens_used: int | None = 0
+    planner_usage_complete: bool = True
     elapsed_ms: int = 0
+
+
+class ModelUsage(Model):
+    prompt_tokens: int = Field(default=0, ge=0)
+    completion_tokens: int = Field(default=0, ge=0)
+    total_tokens: int = Field(default=0, ge=0)
+
+
+class PlannerAttemptTrace(Model):
+    round_number: int = Field(ge=1, le=2)
+    outcome: str
+    model_called: bool = False
+    fallback_used: bool = False
+    fallback_reason: str | None = None
+    latency_ms: float = Field(default=0.0, ge=0)
+    usage_complete: bool = True
+    selected_dimensions: list[str] = Field(default_factory=list)
+
+
+class EvidenceObservation(Model):
+    dimension_id: str
+    status: EvidenceStatus
+    result_ids: list[str] = Field(default_factory=list)
+    material_change: float | None = None
+    concentration_share: float | None = Field(default=None, ge=0, le=1)
+    group_count: int = Field(default=0, ge=0)
+    top_group: str | None = None
+    issue_codes: list[str] = Field(default_factory=list)
+
+
+class InvestigationObservation(Model):
+    analysis_id: str
+    round_number: int = Field(ge=1, le=2)
+    metric_id: str
+    metric_kind: MetricKind
+    question_kind: QuestionKind
+    candidate_dimensions: list[str] = Field(default_factory=list)
+    completed_dimensions: list[str] = Field(default_factory=list)
+    remaining_queries: int = Field(ge=0)
+    remaining_planner_tokens: int | None = Field(default=None, ge=0)
+    evidence: list[EvidenceObservation] = Field(default_factory=list)
+
+
+class InvestigationStepTrace(Model):
+    round_number: int = Field(ge=1, le=2)
+    dimension_id: str
+    status: EvidenceStatus
+    result_ids: list[str] = Field(default_factory=list)
+    material_change: float | None = None
+    concentration_share: float | None = Field(default=None, ge=0, le=1)
+    group_count: int = Field(default=0, ge=0)
+    top_group: str | None = None
+    issue_codes: list[str] = Field(default_factory=list)
+
+
+class InvestigationRoundTrace(Model):
+    round_number: int = Field(ge=1, le=2)
+    observation: InvestigationObservation
+    planner: PlannerAttemptTrace
+    steps: list[InvestigationStepTrace] = Field(default_factory=list)
+
+
+class InvestigationTrace(Model):
+    rounds: list[InvestigationRoundTrace] = Field(default_factory=list)
+    completed_dimensions: list[str] = Field(default_factory=list)
+    remaining_dimensions: list[str] = Field(default_factory=list)
+    stop_reason: str
+    planner_fallback_used: bool = False
 
 
 class DimensionDefinition(Model):
@@ -326,7 +403,11 @@ class ObservationSummary(Model):
     metric_kind: MetricKind
     question_kind: QuestionKind
     candidate_dimensions: list[str] = Field(default_factory=list)
-    evidence_summaries: list[str] = Field(default_factory=list)
+    completed_dimensions: list[str] = Field(default_factory=list)
+    round_number: int = Field(default=1, ge=1, le=2)
+    remaining_queries: int = Field(default=0, ge=0)
+    remaining_planner_tokens: int | None = Field(default=None, ge=0)
+    evidence_summaries: list[EvidenceObservation] = Field(default_factory=list)
 
 
 class InvestigationOutcome(Model):
@@ -338,6 +419,9 @@ class InvestigationOutcome(Model):
     claims: list[Claim] = Field(default_factory=list)
     artifacts: list[ResultArtifact] = Field(default_factory=list)
     issue_codes: list[str] = Field(default_factory=list)
+    planner_tokens_used: int | None = 0
+    planner_usage_complete: bool = True
+    investigation: InvestigationTrace | None = None
 
 
 class AnalysisRequest(Model):
@@ -364,6 +448,7 @@ class AnalysisResponse(Model):
     budget_usage: BudgetUsage = Field(default_factory=BudgetUsage)
     evidence: list[ResultArtifact] = Field(default_factory=list)
     sql_audit: list[SqlAudit] = Field(default_factory=list)
+    investigation: InvestigationTrace | None = None
 
 
 def canonical_hash(value: object) -> str:

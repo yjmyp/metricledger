@@ -152,9 +152,11 @@ def context(candidate_dimensions, budget=BudgetPolicy(max_queries=6)):
         intent=AnalysisIntent(
             metric_id="paid_gmv",
             question_kind=QuestionKind.INVESTIGATE,
-            period=DateRange(date(2026, 11, 17), date(2026, 11, 23)),
+            period=DateRange(
+                start=date(2026, 11, 17), end=date(2026, 11, 23)
+            ),
             comparison_period=DateRange(
-                date(2026, 11, 10), date(2026, 11, 16)
+                start=date(2026, 11, 10), end=date(2026, 11, 16)
             ),
             candidate_dimensions=candidate_dimensions,
         ),
