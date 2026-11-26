@@ -56,6 +56,46 @@ export interface SqlAuditPayload {
   elapsed_ms: number;
 }
 
+export interface InvestigationStepPayload {
+  round_number: number;
+  dimension_id: string;
+  status:
+    | "MATERIAL_CHANGE"
+    | "NO_MATERIAL_CHANGE"
+    | "NO_COMPARABLE_GROUPS"
+    | "QUERY_FAILED";
+  result_ids: string[];
+  material_change: number | null;
+  concentration_share: number | null;
+  group_count: number;
+  top_group: string | null;
+  issue_codes: string[];
+}
+
+export interface InvestigationRoundPayload {
+  round_number: number;
+  planner: {
+    round_number: number;
+    outcome: string;
+    model_called: boolean;
+    fallback_used: boolean;
+    fallback_reason: string | null;
+    latency_ms: number;
+    usage_complete: boolean;
+    selected_dimensions: string[];
+  };
+  steps: InvestigationStepPayload[];
+  observation: Record<string, unknown>;
+}
+
+export interface InvestigationPayload {
+  rounds: InvestigationRoundPayload[];
+  completed_dimensions: string[];
+  remaining_dimensions: string[];
+  stop_reason: string;
+  planner_fallback_used: boolean;
+}
+
 export interface AnalysisPayload {
   analysis_id: string;
   admission: {
@@ -80,11 +120,13 @@ export interface AnalysisPayload {
   context: AnalysisContextPayload | null;
   budget_usage: {
     queries_used?: number;
-    planner_tokens_used?: number;
+    planner_tokens_used?: number | null;
+    planner_usage_complete?: boolean;
     elapsed_ms?: number;
   };
   evidence: EvidencePayload[];
   sql_audit: SqlAuditPayload[];
+  investigation?: InvestigationPayload | null;
 }
 
 export interface AnalysisRequestPayload {

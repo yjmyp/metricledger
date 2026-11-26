@@ -3,6 +3,7 @@ import { FormEvent, useMemo, useState } from "react";
 import {
   AnalysisPayload,
   ClaimPayload,
+  InvestigationPayload,
   runAnalysis,
 } from "./api";
 
@@ -107,6 +108,76 @@ function EmptyClaimState({
       <span className="empty-state__mark">∅</span>
       <p>{copy}</p>
     </div>
+  );
+}
+
+function InvestigationTimeline({
+  investigation,
+  plannerTokensUsed,
+  plannerUsageComplete,
+}: {
+  investigation: InvestigationPayload;
+  plannerTokensUsed: number | null | undefined;
+  plannerUsageComplete: boolean | undefined;
+}) {
+  return (
+    <section
+      className="investigation-card"
+      data-testid="investigation-trace"
+    >
+      <div className="section-title">
+        <div>
+          <p className="eyebrow">BOUNDED INVESTIGATION</p>
+          <h3>调查轨迹</h3>
+        </div>
+        <code>{investigation.stop_reason}</code>
+      </div>
+
+      <div className="round-list">
+        {investigation.rounds.map((round) => (
+          <article key={round.round_number} className="round-card">
+            <header>
+              <span className="round-number">
+                {String(round.round_number).padStart(2, "0")}
+              </span>
+              <strong>第 {round.round_number} 轮</strong>
+              <code>{round.planner.outcome}</code>
+              <small>{round.planner.latency_ms.toFixed(1)} ms</small>
+            </header>
+            <p className="round-selection">
+              选择：
+              {round.planner.selected_dimensions.join(" / ") || "无"}
+              {round.planner.fallback_used
+                ? ` · 已回退：${round.planner.fallback_reason ?? "未知原因"}`
+                : ""}
+            </p>
+            {round.steps.length > 0 ? (
+              <div className="step-list">
+                {round.steps.map((step) => (
+                  <div
+                    key={`${round.round_number}-${step.dimension_id}`}
+                    className="step-row"
+                  >
+                    <code>{step.dimension_id}</code>
+                    <span>{step.status}</span>
+                    <small>{step.result_ids.length} 份证据</small>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="round-empty">本轮未执行维度查询。</p>
+            )}
+          </article>
+        ))}
+      </div>
+
+      <p className="round-budget">
+        Token {plannerTokensUsed ?? "未知"} ·{" "}
+        {plannerUsageComplete
+          ? "用量完整"
+          : "用量不完整，后续不再调用模型"}
+      </p>
+    </section>
   );
 }
 
@@ -293,6 +364,18 @@ export default function App() {
                   <code>{semanticHash}</code>
                 </div>
               </div>
+
+              {analysis.investigation ? (
+                <InvestigationTimeline
+                  investigation={analysis.investigation}
+                  plannerTokensUsed={
+                    analysis.budget_usage.planner_tokens_used
+                  }
+                  plannerUsageComplete={
+                    analysis.budget_usage.planner_usage_complete
+                  }
+                />
+              ) : null}
 
               <div className="result-grid">
                 <div className="primary-result">

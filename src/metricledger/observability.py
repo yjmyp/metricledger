@@ -156,6 +156,10 @@ class RequestMetrics:
         self._analysis_issue_counts: dict[
             tuple[str, str, str], int
         ] = defaultdict(int)
+        self._planner_calls: dict[str, int] = defaultdict(int)
+        self._planner_tokens = 0
+        self._investigation_steps: dict[str, int] = defaultdict(int)
+        self._context_drift = 0
 
     def record_request(
         self,
@@ -193,6 +197,18 @@ class RequestMetrics:
                 self._analysis_issue_counts[
                     (admission, issue.code, issue.severity.value)
                 ] += 1
+            investigation = response.investigation
+            if investigation is not None:
+                for round_trace in investigation.rounds:
+                    self._planner_calls[round_trace.planner.outcome] += 1
+                    for step in round_trace.steps:
+                        self._investigation_steps[step.status.value] += 1
+                if response.budget_usage.planner_usage_complete:
+                    self._planner_tokens += (
+                        response.budget_usage.planner_tokens_used or 0
+                    )
+                if investigation.stop_reason == "context_drift":
+                    self._context_drift += 1
 
     def render(self, *, engine=None, ledger=None) -> str:
         with self._lock:
@@ -204,6 +220,10 @@ class RequestMetrics:
             auth_failures = self._auth_failures
             rate_limited = self._rate_limited
             analysis_issue_counts = dict(self._analysis_issue_counts)
+            planner_calls = dict(self._planner_calls)
+            planner_tokens = self._planner_tokens
+            investigation_steps = dict(self._investigation_steps)
+            context_drift = self._context_drift
 
         lines = [
             "# HELP metricledger_http_requests_total HTTP requests processed.",
@@ -262,6 +282,42 @@ class RequestMetrics:
                 f'code="{_escape(code)}",'
                 f'severity="{_escape(severity)}"}} {count}'
             )
+        lines.extend(
+            [
+                "# HELP metricledger_planner_calls_total "
+                "Planner attempts by outcome.",
+                "# TYPE metricledger_planner_calls_total counter",
+            ]
+        )
+        for outcome, count in sorted(planner_calls.items()):
+            lines.append(
+                "metricledger_planner_calls_total"
+                f'{{outcome="{_escape(outcome)}"}} {count}'
+            )
+        lines.extend(
+            [
+                "# HELP metricledger_planner_tokens_total "
+                "Planner tokens from responses with complete usage.",
+                "# TYPE metricledger_planner_tokens_total counter",
+                f"metricledger_planner_tokens_total {planner_tokens}",
+                "# HELP metricledger_investigation_steps_total "
+                "Investigation evidence steps by status.",
+                "# TYPE metricledger_investigation_steps_total counter",
+            ]
+        )
+        for status, count in sorted(investigation_steps.items()):
+            lines.append(
+                "metricledger_investigation_steps_total"
+                f'{{status="{_escape(status)}"}} {count}'
+            )
+        lines.extend(
+            [
+                "# HELP metricledger_context_drift_total "
+                "Analyses stopped because admitted context drifted.",
+                "# TYPE metricledger_context_drift_total counter",
+                f"metricledger_context_drift_total {context_drift}",
+            ]
+        )
         if engine is not None:
             lines.extend(
                 [

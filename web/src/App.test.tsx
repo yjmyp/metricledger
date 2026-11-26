@@ -194,4 +194,116 @@ describe("MetricLedger workbench", () => {
     expect(await screen.findByText(unsafeText)).toBeInTheDocument();
     expect(document.querySelector("img")).not.toBeInTheDocument();
   });
+
+  it("renders investigation rounds, step status, fallback, and usage", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          analysis_id: "a4",
+          admission: { status: "ADMITTED", issue_codes: [] },
+          completeness: "PARTIAL",
+          answer: null,
+          claims: [],
+          issues: [],
+          context: null,
+          budget_usage: {
+            queries_used: 4,
+            planner_tokens_used: 120,
+            planner_usage_complete: true,
+            elapsed_ms: 88,
+          },
+          evidence: [],
+          sql_audit: [],
+          investigation: {
+            stop_reason: "all_candidates_observed",
+            completed_dimensions: ["region", "channel"],
+            remaining_dimensions: [],
+            planner_fallback_used: true,
+            rounds: [
+              {
+                round_number: 1,
+                observation: {
+                  analysis_id: "a4",
+                  round_number: 1,
+                  metric_id: "paid_gmv",
+                  metric_kind: "ADDITIVE",
+                  question_kind: "INVESTIGATE",
+                  candidate_dimensions: ["region", "channel"],
+                  completed_dimensions: [],
+                  remaining_queries: 4,
+                  remaining_planner_tokens: 1880,
+                  evidence: [],
+                },
+                planner: {
+                  round_number: 1,
+                  outcome: "MODEL_SUCCESS",
+                  model_called: true,
+                  fallback_used: false,
+                  fallback_reason: null,
+                  latency_ms: 42,
+                  usage_complete: true,
+                  selected_dimensions: ["region"],
+                },
+                steps: [
+                  {
+                    round_number: 1,
+                    dimension_id: "region",
+                    status: "NO_MATERIAL_CHANGE",
+                    result_ids: ["r1", "r2"],
+                    material_change: 0,
+                    concentration_share: null,
+                    group_count: 4,
+                    top_group: null,
+                    issue_codes: [],
+                  },
+                ],
+              },
+              {
+                round_number: 2,
+                observation: {
+                  analysis_id: "a4",
+                  round_number: 2,
+                  metric_id: "paid_gmv",
+                  metric_kind: "ADDITIVE",
+                  question_kind: "INVESTIGATE",
+                  candidate_dimensions: ["region", "channel"],
+                  completed_dimensions: ["region"],
+                  remaining_queries: 2,
+                  remaining_planner_tokens: 1880,
+                  evidence: [],
+                },
+                planner: {
+                  round_number: 2,
+                  outcome: "FALLBACK_TIMEOUT",
+                  model_called: true,
+                  fallback_used: true,
+                  fallback_reason: "timeout",
+                  latency_ms: 10000,
+                  usage_complete: false,
+                  selected_dimensions: ["channel"],
+                },
+                steps: [],
+              },
+            ],
+          },
+        }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        },
+      ),
+    );
+
+    render(<App />);
+    await userEvent.click(
+      screen.getByRole("button", { name: "开始调查" }),
+    );
+
+    expect(await screen.findByText("调查轨迹")).toBeInTheDocument();
+    expect(screen.getByText("第 1 轮")).toBeInTheDocument();
+    expect(screen.getByText("第 2 轮")).toBeInTheDocument();
+    expect(screen.getByText("FALLBACK_TIMEOUT")).toBeInTheDocument();
+    expect(screen.getByText("NO_MATERIAL_CHANGE")).toBeInTheDocument();
+    expect(screen.getByText(/Token 120/)).toBeInTheDocument();
+  });
 });
