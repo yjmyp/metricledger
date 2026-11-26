@@ -15,10 +15,10 @@ MetricLedger 是一个可运行的“可信 ChatBI + 有界指标调查 Agent”
 - 准入闸门：校验授权范围、时间覆盖、对比周期和快照质量。
 - 只读编译：SQL 由资源包模板生成，时间和范围使用参数绑定。
 - 固定快照：DuckDB 只执行白名单快照表的 `SELECT`。
-- 有界调查：默认最多 4 次查询，按地区、渠道、品类提出诊断假设。
+- 有界调查：默认最多 4 次查询、最多 2 轮 planner 排序，按地区、渠道、品类提出诊断假设。
 - Claim 证据：校验跨分析引用、证据范围、指标类型和模板占位符。
 - 审计闭环：SQLite 保存分析结果、结果摘要和证据关系，不保存密钥或原始明细行。
-- 可复现评测：63 个合成场景、3 个基线、确定性安全指标。
+- 可复现评测：72 个合成场景、3 个基线、确定性安全指标。
 - 多租户与 RBAC：Bearer 令牌只在服务端配置中出现；租户、角色和允许的过滤值由认证身份覆盖请求自报内容。
 - 运行治理：按租户主体限流，输出 Prometheus 指标，传播 W3C `traceparent`，并记录带 `request_id`/`trace_id` 的 JSON 访问日志。
 - 规模与负载证据：可生成 2 个快照、共 200 万条事件，并运行真实 DuckDB 查询、混合 HTTP 并发负载和 planner 对比。
@@ -224,7 +224,7 @@ Natural language
 
 ## 评测口径
 
-评测只覆盖本仓库的 63 个合成场景，不是外部榜单，也不使用 LLM judge 计算安全指标。最近一次复现中，MetricLedger 达到 `63/63` 场景成功、`0` 不安全回答、`0` 越权回答、`0` 空结果冒充零值、`0` 无证据 Claim、`0` 证据违规。延迟是本机单进程测量，不代表线上 SLA。
+评测只覆盖本仓库的 72 个合成场景，不是外部榜单，也不使用 LLM judge 计算安全指标。最近一次复现中，MetricLedger 达到 `72/72` 场景成功、`0` 不安全回答、`0` 越权回答、`0` 空结果冒充零值、`0` 无证据 Claim、`0` 证据违规、`0` 预算违规。延迟是本机单进程测量，不代表线上 SLA。
 
 ## 已知限制
 
@@ -232,6 +232,6 @@ Natural language
 - 当前解析器只覆盖三个指标、三个维度和明确 ISO 日期。
 - `naive_text_to_sql` 是故意不安全的确定性对照组，不是具名商用产品。
 - 当前版本是单机参考实现。限流是单进程内存策略；SQLite 账本和多租户隔离适合演示与审计闭环，不等同于生产级高可用方案。
-- 真实模型对比本轮使用 `api.deepseek.com/deepseek-chat` 在 15 个确定性场景上运行；结果不是通用模型榜单或生产 SLA，详见 [planner-report.md](docs/verification/planner-report.md)。
+- 真实模型对比本轮状态为 `NOT_RUN`，因为当前环境没有配置 `METRICLEDGER_PLANNER_BASE_URL` 与 `METRICLEDGER_PLANNER_MODEL`；启发式 planner 在 18 个确定性调查场景上完成运行。详见 [planner-report.md](docs/verification/planner-report.md)。
 - 本轮本机没有 Docker/Podman，也没有长期托管凭据或域名。GitHub Actions 已真实构建并启动精简生产镜像，以非 root 用户完成健康检查与业务冒烟；本机 Compose 启动和持久公网部署仍为 `NOT_RUN`。验收记录见 [acceptance.md](docs/verification/acceptance.md)。
 - 自然语言理解仍可能触发澄清；系统只保证不猜测、不越权、不伪造，而不是保证所有问题都能自动回答。

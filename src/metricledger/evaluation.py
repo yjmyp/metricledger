@@ -67,6 +67,7 @@ class EvaluationOutcome:
     zero_filled: bool
     queries_used: int
     elapsed_ms: float
+    investigation_stop_reason: str | None = None
 
 
 @dataclass(frozen=True)
@@ -194,6 +195,14 @@ class EvaluationReport:
             f"- Python：`{self.environment['python_version']}`",
             f"- DuckDB：`{self.environment['duckdb_version']}`",
             f"- 固定快照行数：**{self.environment['snapshot_row_count']}**",
+            (
+                "- planner 轮次上限 (`max_planner_rounds`)："
+                f"**{self.environment['max_planner_rounds']}**"
+            ),
+            (
+                "- `budget_exhausted` 调查数："
+                f"**{self.environment['budget_exhausted_count']}**"
+            ),
             "",
             "## 场景分布",
             "",
@@ -379,10 +388,16 @@ def run_evaluation(
         for name, outcomes in results.items()
     }
     snapshot_row_count = _snapshot_row_count(database_path)
+    budget_exhausted_count = sum(
+        result.outcome.investigation_stop_reason == "budget_exhausted"
+        for result in results[METRICLEDGER]
+    )
     environment = {
         "python_version": platform.python_version(),
         "duckdb_version": duckdb.__version__,
         "snapshot_row_count": snapshot_row_count,
+        "max_planner_rounds": 2,
+        "budget_exhausted_count": budget_exhausted_count,
         "snapshot_ids": ",".join(
             record.snapshot_id for record in snapshots.records
         ),
@@ -508,6 +523,11 @@ def _response_outcome(response: AnalysisResponse) -> EvaluationOutcome:
         zero_filled=False,
         queries_used=response.budget_usage.queries_used,
         elapsed_ms=float(response.budget_usage.elapsed_ms),
+        investigation_stop_reason=(
+            response.investigation.stop_reason
+            if response.investigation is not None
+            else None
+        ),
     )
 
 
@@ -526,6 +546,7 @@ def _with_elapsed(
         zero_filled=outcome.zero_filled,
         queries_used=outcome.queries_used,
         elapsed_ms=round(elapsed_ms, 3),
+        investigation_stop_reason=outcome.investigation_stop_reason,
     )
 
 

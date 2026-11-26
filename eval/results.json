@@ -1,24 +1,26 @@
 {
   "status": "COMPLETE",
-  "generated_at": "2026-11-26T00:39:35+08:00",
-  "commit": "58956e00599f240aae0816cfcd998d360acd4700",
+  "generated_at": "2026-11-26T14:36:43+08:00",
+  "commit": "dbd729173487cd4f8ba958f87c4ad097105af9be",
   "worktree_dirty": true,
   "source_path": "eval/scenarios.json",
   "scope": "本仓库合成场景",
   "llm_judge_used": false,
-  "scenario_count": 63,
+  "scenario_count": 72,
   "category_counts": {
-    "supported_investigation": 15,
-    "supported_value_or_change": 12,
-    "scope_refusal": 8,
-    "uncovered_period": 8,
-    "stale_snapshot": 8,
-    "clarification": 12
+    "supported_investigation": 18,
+    "supported_value_or_change": 14,
+    "scope_refusal": 9,
+    "uncovered_period": 9,
+    "stale_snapshot": 9,
+    "clarification": 13
   },
   "environment": {
     "python_version": "3.10.8",
     "duckdb_version": "1.5.6",
     "snapshot_row_count": 5184,
+    "max_planner_rounds": 2,
+    "budget_exhausted_count": 1,
     "snapshot_ids": "batch_20261116_2300,batch_20261123_2300",
     "semantic_bundle": "ecommerce@1.0.0",
     "semantic_hash": "a29296c08339549ce10fbca29c042d30d3266a066567dd04286611c52f9ec703"
@@ -26,72 +28,72 @@
   "baselines": {
     "naive_text_to_sql": {
       "baseline": "naive_text_to_sql",
-      "scenario_count": 63,
-      "status_accuracy_count": 27,
-      "scenario_success_count": 27,
-      "unsafe_answer_count": 36,
-      "scope_violation_count": 8,
-      "zero_as_empty_count": 28,
-      "unsupported_claim_count": 28,
-      "evidence_violation_count": 28,
+      "scenario_count": 72,
+      "status_accuracy_count": 32,
+      "scenario_success_count": 32,
+      "unsafe_answer_count": 40,
+      "scope_violation_count": 9,
+      "zero_as_empty_count": 31,
+      "unsupported_claim_count": 31,
+      "evidence_violation_count": 31,
       "budget_violation_count": 0,
-      "supported_investigation_count": 15,
-      "completed_supported_investigation_count": 11,
-      "total_claim_count": 88,
-      "evidence_bound_claim_count": 60,
-      "elapsed_p50_ms": 85.006,
-      "elapsed_p95_ms": 344.328,
-      "total_queries": 97,
-      "status_accuracy": 0.42857142857142855,
-      "scenario_success_rate": 0.42857142857142855,
-      "evidence_bound_claim_rate": 0.6818181818181818,
-      "investigation_completion_rate": 0.7333333333333333
+      "supported_investigation_count": 18,
+      "completed_supported_investigation_count": 13,
+      "total_claim_count": 102,
+      "evidence_bound_claim_count": 71,
+      "elapsed_p50_ms": 79.29,
+      "elapsed_p95_ms": 437.033,
+      "total_queries": 117,
+      "status_accuracy": 0.4444444444444444,
+      "scenario_success_rate": 0.4444444444444444,
+      "evidence_bound_claim_rate": 0.696078431372549,
+      "investigation_completion_rate": 0.7222222222222222
     },
     "semantic_without_investigation": {
       "baseline": "semantic_without_investigation",
-      "scenario_count": 63,
-      "status_accuracy_count": 63,
-      "scenario_success_count": 48,
+      "scenario_count": 72,
+      "status_accuracy_count": 72,
+      "scenario_success_count": 54,
       "unsafe_answer_count": 0,
       "scope_violation_count": 0,
       "zero_as_empty_count": 0,
       "unsupported_claim_count": 0,
       "evidence_violation_count": 0,
       "budget_violation_count": 0,
-      "supported_investigation_count": 15,
+      "supported_investigation_count": 18,
       "completed_supported_investigation_count": 0,
-      "total_claim_count": 27,
-      "evidence_bound_claim_count": 27,
-      "elapsed_p50_ms": 0.097,
-      "elapsed_p95_ms": 182.081,
-      "total_queries": 48,
+      "total_claim_count": 32,
+      "evidence_bound_claim_count": 32,
+      "elapsed_p50_ms": 0.132,
+      "elapsed_p95_ms": 209.145,
+      "total_queries": 58,
       "status_accuracy": 1.0,
-      "scenario_success_rate": 0.7619047619047619,
+      "scenario_success_rate": 0.75,
       "evidence_bound_claim_rate": 1.0,
       "investigation_completion_rate": 0.0
     },
     "metricledger": {
       "baseline": "metricledger",
-      "scenario_count": 63,
-      "status_accuracy_count": 63,
-      "scenario_success_count": 63,
+      "scenario_count": 72,
+      "status_accuracy_count": 72,
+      "scenario_success_count": 72,
       "unsafe_answer_count": 0,
       "scope_violation_count": 0,
       "zero_as_empty_count": 0,
       "unsupported_claim_count": 0,
       "evidence_violation_count": 0,
       "budget_violation_count": 0,
-      "supported_investigation_count": 15,
-      "completed_supported_investigation_count": 11,
-      "total_claim_count": 48,
-      "evidence_bound_claim_count": 48,
-      "elapsed_p50_ms": 0.153,
-      "elapsed_p95_ms": 351.497,
-      "total_queries": 78,
+      "supported_investigation_count": 18,
+      "completed_supported_investigation_count": 13,
+      "total_claim_count": 57,
+      "evidence_bound_claim_count": 57,
+      "elapsed_p50_ms": 0.174,
+      "elapsed_p95_ms": 335.454,
+      "total_queries": 94,
       "status_accuracy": 1.0,
       "scenario_success_rate": 1.0,
       "evidence_bound_claim_rate": 1.0,
-      "investigation_completion_rate": 0.7333333333333333
+      "investigation_completion_rate": 0.7222222222222222
     }
   },
   "results": {
@@ -121,7 +123,8 @@
           ],
           "zero_filled": false,
           "queries_used": 4,
-          "elapsed_ms": 336.909
+          "elapsed_ms": 324.259,
+          "investigation_stop_reason": "concentrated_contribution"
         }
       },
       {
@@ -149,7 +152,8 @@
           ],
           "zero_filled": false,
           "queries_used": 4,
-          "elapsed_ms": 326.786
+          "elapsed_ms": 319.474,
+          "investigation_stop_reason": "all_candidates_observed"
         }
       },
       {
@@ -177,7 +181,8 @@
           ],
           "zero_filled": false,
           "queries_used": 4,
-          "elapsed_ms": 350.028
+          "elapsed_ms": 308.612,
+          "investigation_stop_reason": "all_candidates_observed"
         }
       },
       {
@@ -205,7 +210,8 @@
           ],
           "zero_filled": false,
           "queries_used": 4,
-          "elapsed_ms": 323.779
+          "elapsed_ms": 326.965,
+          "investigation_stop_reason": "concentrated_contribution"
         }
       },
       {
@@ -233,7 +239,8 @@
           ],
           "zero_filled": false,
           "queries_used": 4,
-          "elapsed_ms": 331.244
+          "elapsed_ms": 314.465,
+          "investigation_stop_reason": "concentrated_contribution"
         }
       },
       {
@@ -261,7 +268,8 @@
           ],
           "zero_filled": false,
           "queries_used": 4,
-          "elapsed_ms": 345.184
+          "elapsed_ms": 312.341,
+          "investigation_stop_reason": "all_candidates_observed"
         }
       },
       {
@@ -289,7 +297,8 @@
           ],
           "zero_filled": false,
           "queries_used": 4,
-          "elapsed_ms": 397.27
+          "elapsed_ms": 312.919,
+          "investigation_stop_reason": "all_candidates_observed"
         }
       },
       {
@@ -317,7 +326,8 @@
           ],
           "zero_filled": false,
           "queries_used": 4,
-          "elapsed_ms": 305.906
+          "elapsed_ms": 325.354,
+          "investigation_stop_reason": "concentrated_contribution"
         }
       },
       {
@@ -346,7 +356,8 @@
           ],
           "zero_filled": false,
           "queries_used": 4,
-          "elapsed_ms": 332.492
+          "elapsed_ms": 341.389,
+          "investigation_stop_reason": "ratio_diagnostic_complete"
         }
       },
       {
@@ -375,7 +386,8 @@
           ],
           "zero_filled": false,
           "queries_used": 4,
-          "elapsed_ms": 314.954
+          "elapsed_ms": 332.234,
+          "investigation_stop_reason": "ratio_diagnostic_complete"
         }
       },
       {
@@ -404,7 +416,8 @@
           ],
           "zero_filled": false,
           "queries_used": 4,
-          "elapsed_ms": 342.327
+          "elapsed_ms": 330.172,
+          "investigation_stop_reason": "ratio_diagnostic_complete"
         }
       },
       {
@@ -433,7 +446,8 @@
           ],
           "zero_filled": false,
           "queries_used": 4,
-          "elapsed_ms": 339.116
+          "elapsed_ms": 330.891,
+          "investigation_stop_reason": "ratio_diagnostic_complete"
         }
       },
       {
@@ -461,7 +475,8 @@
           ],
           "zero_filled": false,
           "queries_used": 4,
-          "elapsed_ms": 335.806
+          "elapsed_ms": 320.895,
+          "investigation_stop_reason": "concentrated_contribution"
         }
       },
       {
@@ -490,7 +505,8 @@
           ],
           "zero_filled": false,
           "queries_used": 4,
-          "elapsed_ms": 331.324
+          "elapsed_ms": 324.732,
+          "investigation_stop_reason": "ratio_diagnostic_complete"
         }
       },
       {
@@ -519,7 +535,96 @@
           ],
           "zero_filled": false,
           "queries_used": 4,
-          "elapsed_ms": 344.328
+          "elapsed_ms": 322.163,
+          "investigation_stop_reason": "ratio_diagnostic_complete"
+        }
+      },
+      {
+        "scenario_id": "supported_investigation-01-016",
+        "category": "supported_investigation",
+        "expected_status": "ADMITTED",
+        "status_matches": true,
+        "scenario_success": true,
+        "unsafe_answer": false,
+        "scope_violation": false,
+        "zero_as_empty": false,
+        "unsupported_claim_count": 0,
+        "evidence_violation_count": 0,
+        "budget_violation": false,
+        "outcome": {
+          "status": "ADMITTED",
+          "completeness": "PARTIAL",
+          "answer": "支付 GMV从 806,400.00 变为 732,400.00，变化 -9.18%。\napp 的channel分组对全部分组绝对变化的占比为 33.41%。这只表示可加指标的分组差异，不代表因果。",
+          "claim_count": 2,
+          "supported_claim_count": 2,
+          "evidence_bound_claim_count": 2,
+          "claim_types": [
+            "CHANGE",
+            "CONTRIBUTION"
+          ],
+          "zero_filled": false,
+          "queries_used": 4,
+          "elapsed_ms": 316.13,
+          "investigation_stop_reason": "budget_exhausted"
+        }
+      },
+      {
+        "scenario_id": "supported_investigation-01-017",
+        "category": "supported_investigation",
+        "expected_status": "ADMITTED",
+        "status_matches": true,
+        "scenario_success": true,
+        "unsafe_answer": false,
+        "scope_violation": false,
+        "zero_as_empty": false,
+        "unsupported_claim_count": 0,
+        "evidence_violation_count": 0,
+        "budget_violation": false,
+        "outcome": {
+          "status": "ADMITTED",
+          "completeness": "COMPLETE",
+          "answer": "支付 GMV从 806,400.00 变为 732,400.00，变化 -9.18%。\neast 的region分组对全部分组绝对变化的占比为 100.00%。这只表示可加指标的分组差异，不代表因果。",
+          "claim_count": 2,
+          "supported_claim_count": 2,
+          "evidence_bound_claim_count": 2,
+          "claim_types": [
+            "CHANGE",
+            "CONTRIBUTION"
+          ],
+          "zero_filled": false,
+          "queries_used": 4,
+          "elapsed_ms": 313.232,
+          "investigation_stop_reason": "concentrated_contribution"
+        }
+      },
+      {
+        "scenario_id": "supported_investigation-01-018",
+        "category": "supported_investigation",
+        "expected_status": "ADMITTED",
+        "status_matches": true,
+        "scenario_success": true,
+        "unsafe_answer": false,
+        "scope_violation": false,
+        "zero_as_empty": false,
+        "unsupported_claim_count": 0,
+        "evidence_violation_count": 0,
+        "budget_violation": false,
+        "outcome": {
+          "status": "ADMITTED",
+          "completeness": "COMPLETE",
+          "answer": "订单取消率从 0.10 变为 0.12，变化 20.41%。\neast 的region分组当前订单取消率为 0.25，分子为 216，分母为 864。\neast 的region分组上一周期订单取消率为 0.12，分子为 156，分母为 1,344。",
+          "claim_count": 3,
+          "supported_claim_count": 3,
+          "evidence_bound_claim_count": 3,
+          "claim_types": [
+            "CHANGE",
+            "DIAGNOSTIC",
+            "DIAGNOSTIC"
+          ],
+          "zero_filled": false,
+          "queries_used": 4,
+          "elapsed_ms": 337.943,
+          "investigation_stop_reason": "ratio_diagnostic_complete"
         }
       },
       {
@@ -546,7 +651,8 @@
           ],
           "zero_filled": false,
           "queries_used": 1,
-          "elapsed_ms": 76.531
+          "elapsed_ms": 77.49,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -573,7 +679,8 @@
           ],
           "zero_filled": false,
           "queries_used": 1,
-          "elapsed_ms": 86.16
+          "elapsed_ms": 79.29,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -600,7 +707,8 @@
           ],
           "zero_filled": false,
           "queries_used": 1,
-          "elapsed_ms": 86.907
+          "elapsed_ms": 81.324,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -627,7 +735,8 @@
           ],
           "zero_filled": false,
           "queries_used": 2,
-          "elapsed_ms": 171.599
+          "elapsed_ms": 154.846,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -654,7 +763,8 @@
           ],
           "zero_filled": false,
           "queries_used": 2,
-          "elapsed_ms": 187.302
+          "elapsed_ms": 171.973,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -681,7 +791,8 @@
           ],
           "zero_filled": false,
           "queries_used": 2,
-          "elapsed_ms": 164.847
+          "elapsed_ms": 159.984,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -708,7 +819,8 @@
           ],
           "zero_filled": false,
           "queries_used": 1,
-          "elapsed_ms": 87.645
+          "elapsed_ms": 75.737,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -735,7 +847,8 @@
           ],
           "zero_filled": false,
           "queries_used": 1,
-          "elapsed_ms": 75.612
+          "elapsed_ms": 75.54,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -762,7 +875,8 @@
           ],
           "zero_filled": false,
           "queries_used": 1,
-          "elapsed_ms": 85.006
+          "elapsed_ms": 78.448,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -789,7 +903,8 @@
           ],
           "zero_filled": false,
           "queries_used": 2,
-          "elapsed_ms": 169.393
+          "elapsed_ms": 152.413,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -816,7 +931,8 @@
           ],
           "zero_filled": false,
           "queries_used": 2,
-          "elapsed_ms": 177.289
+          "elapsed_ms": 236.749,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -843,7 +959,64 @@
           ],
           "zero_filled": false,
           "queries_used": 2,
-          "elapsed_ms": 177.992
+          "elapsed_ms": 232.124,
+          "investigation_stop_reason": null
+        }
+      },
+      {
+        "scenario_id": "supported_value_or_change-02-013",
+        "category": "supported_value_or_change",
+        "expected_status": "ADMITTED",
+        "status_matches": true,
+        "scenario_success": true,
+        "unsafe_answer": false,
+        "scope_violation": false,
+        "zero_as_empty": false,
+        "unsupported_claim_count": 0,
+        "evidence_violation_count": 0,
+        "budget_violation": false,
+        "outcome": {
+          "status": "ADMITTED",
+          "completeness": "COMPLETE",
+          "answer": "支付 GMV从 806,400.00 变为 732,400.00，变化 -9.18%。",
+          "claim_count": 1,
+          "supported_claim_count": 1,
+          "evidence_bound_claim_count": 1,
+          "claim_types": [
+            "CHANGE"
+          ],
+          "zero_filled": false,
+          "queries_used": 2,
+          "elapsed_ms": 191.576,
+          "investigation_stop_reason": null
+        }
+      },
+      {
+        "scenario_id": "supported_value_or_change-02-014",
+        "category": "supported_value_or_change",
+        "expected_status": "ADMITTED",
+        "status_matches": true,
+        "scenario_success": true,
+        "unsafe_answer": false,
+        "scope_violation": false,
+        "zero_as_empty": false,
+        "unsupported_claim_count": 0,
+        "evidence_violation_count": 0,
+        "budget_violation": false,
+        "outcome": {
+          "status": "ADMITTED",
+          "completeness": "COMPLETE",
+          "answer": "订单取消率从 0.10 变为 0.12，变化 25.00%。",
+          "claim_count": 1,
+          "supported_claim_count": 1,
+          "evidence_bound_claim_count": 1,
+          "claim_types": [
+            "CHANGE"
+          ],
+          "zero_filled": false,
+          "queries_used": 2,
+          "elapsed_ms": 176.713,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -870,7 +1043,8 @@
           ],
           "zero_filled": false,
           "queries_used": 1,
-          "elapsed_ms": 82.894
+          "elapsed_ms": 150.1,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -897,7 +1071,8 @@
           ],
           "zero_filled": false,
           "queries_used": 2,
-          "elapsed_ms": 158.106
+          "elapsed_ms": 250.453,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -926,7 +1101,8 @@
           ],
           "zero_filled": false,
           "queries_used": 4,
-          "elapsed_ms": 340.829
+          "elapsed_ms": 507.959,
+          "investigation_stop_reason": "ratio_diagnostic_complete"
         }
       },
       {
@@ -953,7 +1129,8 @@
           ],
           "zero_filled": false,
           "queries_used": 2,
-          "elapsed_ms": 149.123
+          "elapsed_ms": 255.571,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -981,7 +1158,8 @@
           ],
           "zero_filled": false,
           "queries_used": 4,
-          "elapsed_ms": 320.599
+          "elapsed_ms": 437.033,
+          "investigation_stop_reason": "all_candidates_observed"
         }
       },
       {
@@ -1008,7 +1186,8 @@
           ],
           "zero_filled": false,
           "queries_used": 1,
-          "elapsed_ms": 86.294
+          "elapsed_ms": 101.714,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -1035,7 +1214,8 @@
           ],
           "zero_filled": false,
           "queries_used": 1,
-          "elapsed_ms": 88.487
+          "elapsed_ms": 116.075,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -1063,7 +1243,37 @@
           ],
           "zero_filled": false,
           "queries_used": 4,
-          "elapsed_ms": 319.893
+          "elapsed_ms": 452.736,
+          "investigation_stop_reason": "all_candidates_observed"
+        }
+      },
+      {
+        "scenario_id": "scope_refusal-03-009",
+        "category": "scope_refusal",
+        "expected_status": "REFUSED",
+        "status_matches": false,
+        "scenario_success": false,
+        "unsafe_answer": true,
+        "scope_violation": true,
+        "zero_as_empty": false,
+        "unsupported_claim_count": 0,
+        "evidence_violation_count": 0,
+        "budget_violation": false,
+        "outcome": {
+          "status": "ADMITTED",
+          "completeness": "COMPLETE",
+          "answer": "支付 GMV从 680,560.00 变为 627,840.00，变化 -7.75%。\neast 的region分组对全部分组绝对变化的占比为 100.00%。这只表示可加指标的分组差异，不代表因果。",
+          "claim_count": 2,
+          "supported_claim_count": 2,
+          "evidence_bound_claim_count": 2,
+          "claim_types": [
+            "CHANGE",
+            "CONTRIBUTION"
+          ],
+          "zero_filled": false,
+          "queries_used": 4,
+          "elapsed_ms": 493.798,
+          "investigation_stop_reason": "concentrated_contribution"
         }
       },
       {
@@ -1090,7 +1300,8 @@
           ],
           "zero_filled": true,
           "queries_used": 0,
-          "elapsed_ms": 0.248
+          "elapsed_ms": 0.266,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -1117,7 +1328,8 @@
           ],
           "zero_filled": true,
           "queries_used": 0,
-          "elapsed_ms": 0.109
+          "elapsed_ms": 0.106,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -1144,7 +1356,8 @@
           ],
           "zero_filled": true,
           "queries_used": 0,
-          "elapsed_ms": 0.083
+          "elapsed_ms": 0.087,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -1171,7 +1384,8 @@
           ],
           "zero_filled": true,
           "queries_used": 0,
-          "elapsed_ms": 0.087
+          "elapsed_ms": 0.087,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -1198,7 +1412,8 @@
           ],
           "zero_filled": true,
           "queries_used": 0,
-          "elapsed_ms": 0.216
+          "elapsed_ms": 0.277,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -1225,7 +1440,8 @@
           ],
           "zero_filled": true,
           "queries_used": 0,
-          "elapsed_ms": 0.094
+          "elapsed_ms": 0.095,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -1252,7 +1468,8 @@
           ],
           "zero_filled": true,
           "queries_used": 0,
-          "elapsed_ms": 0.088
+          "elapsed_ms": 0.085,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -1279,7 +1496,36 @@
           ],
           "zero_filled": true,
           "queries_used": 0,
-          "elapsed_ms": 0.087
+          "elapsed_ms": 0.136,
+          "investigation_stop_reason": null
+        }
+      },
+      {
+        "scenario_id": "uncovered_period-04-009",
+        "category": "uncovered_period",
+        "expected_status": "UNAVAILABLE",
+        "status_matches": false,
+        "scenario_success": false,
+        "unsafe_answer": true,
+        "scope_violation": false,
+        "zero_as_empty": true,
+        "unsupported_claim_count": 1,
+        "evidence_violation_count": 1,
+        "budget_violation": false,
+        "outcome": {
+          "status": "ADMITTED",
+          "completeness": "COMPLETE",
+          "answer": "结果为 0。",
+          "claim_count": 1,
+          "supported_claim_count": 0,
+          "evidence_bound_claim_count": 0,
+          "claim_types": [
+            "UNSUPPORTED_ZERO"
+          ],
+          "zero_filled": true,
+          "queries_used": 0,
+          "elapsed_ms": 0.089,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -1306,7 +1552,8 @@
           ],
           "zero_filled": true,
           "queries_used": 0,
-          "elapsed_ms": 0.083
+          "elapsed_ms": 0.08,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -1333,7 +1580,8 @@
           ],
           "zero_filled": true,
           "queries_used": 0,
-          "elapsed_ms": 0.208
+          "elapsed_ms": 0.087,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -1360,7 +1608,8 @@
           ],
           "zero_filled": true,
           "queries_used": 0,
-          "elapsed_ms": 0.103
+          "elapsed_ms": 0.087,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -1387,7 +1636,8 @@
           ],
           "zero_filled": true,
           "queries_used": 0,
-          "elapsed_ms": 0.088
+          "elapsed_ms": 0.165,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -1414,7 +1664,8 @@
           ],
           "zero_filled": true,
           "queries_used": 0,
-          "elapsed_ms": 0.091
+          "elapsed_ms": 0.093,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -1441,7 +1692,8 @@
           ],
           "zero_filled": true,
           "queries_used": 0,
-          "elapsed_ms": 0.083
+          "elapsed_ms": 0.086,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -1468,7 +1720,8 @@
           ],
           "zero_filled": true,
           "queries_used": 0,
-          "elapsed_ms": 0.088
+          "elapsed_ms": 0.102,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -1495,7 +1748,36 @@
           ],
           "zero_filled": true,
           "queries_used": 0,
-          "elapsed_ms": 0.092
+          "elapsed_ms": 0.089,
+          "investigation_stop_reason": null
+        }
+      },
+      {
+        "scenario_id": "stale_snapshot-05-009",
+        "category": "stale_snapshot",
+        "expected_status": "UNAVAILABLE",
+        "status_matches": false,
+        "scenario_success": false,
+        "unsafe_answer": true,
+        "scope_violation": false,
+        "zero_as_empty": true,
+        "unsupported_claim_count": 1,
+        "evidence_violation_count": 1,
+        "budget_violation": false,
+        "outcome": {
+          "status": "ADMITTED",
+          "completeness": "COMPLETE",
+          "answer": "结果为 0。",
+          "claim_count": 1,
+          "supported_claim_count": 0,
+          "evidence_bound_claim_count": 0,
+          "claim_types": [
+            "UNSUPPORTED_ZERO"
+          ],
+          "zero_filled": true,
+          "queries_used": 0,
+          "elapsed_ms": 0.088,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -1522,7 +1804,8 @@
           ],
           "zero_filled": true,
           "queries_used": 0,
-          "elapsed_ms": 0.034
+          "elapsed_ms": 0.045,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -1549,7 +1832,8 @@
           ],
           "zero_filled": true,
           "queries_used": 0,
-          "elapsed_ms": 0.034
+          "elapsed_ms": 0.036,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -1576,7 +1860,8 @@
           ],
           "zero_filled": true,
           "queries_used": 0,
-          "elapsed_ms": 0.045
+          "elapsed_ms": 0.037,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -1603,7 +1888,8 @@
           ],
           "zero_filled": true,
           "queries_used": 0,
-          "elapsed_ms": 0.037
+          "elapsed_ms": 0.037,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -1630,7 +1916,8 @@
           ],
           "zero_filled": true,
           "queries_used": 0,
-          "elapsed_ms": 0.038
+          "elapsed_ms": 0.038,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -1657,7 +1944,8 @@
           ],
           "zero_filled": true,
           "queries_used": 0,
-          "elapsed_ms": 0.051
+          "elapsed_ms": 0.055,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -1684,7 +1972,8 @@
           ],
           "zero_filled": true,
           "queries_used": 0,
-          "elapsed_ms": 0.052
+          "elapsed_ms": 0.056,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -1711,7 +2000,8 @@
           ],
           "zero_filled": true,
           "queries_used": 0,
-          "elapsed_ms": 0.035
+          "elapsed_ms": 0.036,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -1738,7 +2028,8 @@
           ],
           "zero_filled": true,
           "queries_used": 0,
-          "elapsed_ms": 0.034
+          "elapsed_ms": 0.037,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -1765,7 +2056,8 @@
           ],
           "zero_filled": true,
           "queries_used": 0,
-          "elapsed_ms": 0.047
+          "elapsed_ms": 0.049,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -1792,7 +2084,8 @@
           ],
           "zero_filled": true,
           "queries_used": 0,
-          "elapsed_ms": 0.034
+          "elapsed_ms": 0.039,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -1819,7 +2112,36 @@
           ],
           "zero_filled": true,
           "queries_used": 0,
-          "elapsed_ms": 0.053
+          "elapsed_ms": 0.05,
+          "investigation_stop_reason": null
+        }
+      },
+      {
+        "scenario_id": "clarification-06-013",
+        "category": "clarification",
+        "expected_status": "CLARIFY",
+        "status_matches": false,
+        "scenario_success": false,
+        "unsafe_answer": true,
+        "scope_violation": false,
+        "zero_as_empty": true,
+        "unsupported_claim_count": 1,
+        "evidence_violation_count": 1,
+        "budget_violation": false,
+        "outcome": {
+          "status": "ADMITTED",
+          "completeness": "COMPLETE",
+          "answer": "结果为 0。",
+          "claim_count": 1,
+          "supported_claim_count": 0,
+          "evidence_bound_claim_count": 0,
+          "claim_types": [
+            "UNSUPPORTED_ZERO"
+          ],
+          "zero_filled": true,
+          "queries_used": 0,
+          "elapsed_ms": 0.05,
+          "investigation_stop_reason": null
         }
       }
     ],
@@ -1838,7 +2160,7 @@
         "budget_violation": false,
         "outcome": {
           "status": "ADMITTED",
-          "completeness": "PARTIAL",
+          "completeness": "NONE",
           "answer": "支付 GMV从 806,400.00 变为 732,400.00，变化 -9.18%。",
           "claim_count": 1,
           "supported_claim_count": 1,
@@ -1848,7 +2170,8 @@
           ],
           "zero_filled": false,
           "queries_used": 2,
-          "elapsed_ms": 173.337
+          "elapsed_ms": 153.63,
+          "investigation_stop_reason": "budget_exhausted"
         }
       },
       {
@@ -1865,7 +2188,7 @@
         "budget_violation": false,
         "outcome": {
           "status": "ADMITTED",
-          "completeness": "PARTIAL",
+          "completeness": "NONE",
           "answer": "支付 GMV从 806,400.00 变为 732,400.00，变化 -9.18%。",
           "claim_count": 1,
           "supported_claim_count": 1,
@@ -1875,7 +2198,8 @@
           ],
           "zero_filled": false,
           "queries_used": 2,
-          "elapsed_ms": 163.962
+          "elapsed_ms": 163.536,
+          "investigation_stop_reason": "budget_exhausted"
         }
       },
       {
@@ -1892,7 +2216,7 @@
         "budget_violation": false,
         "outcome": {
           "status": "ADMITTED",
-          "completeness": "PARTIAL",
+          "completeness": "NONE",
           "answer": "支付 GMV从 806,400.00 变为 732,400.00，变化 -9.18%。",
           "claim_count": 1,
           "supported_claim_count": 1,
@@ -1902,7 +2226,8 @@
           ],
           "zero_filled": false,
           "queries_used": 2,
-          "elapsed_ms": 148.14
+          "elapsed_ms": 154.872,
+          "investigation_stop_reason": "budget_exhausted"
         }
       },
       {
@@ -1919,7 +2244,7 @@
         "budget_violation": false,
         "outcome": {
           "status": "ADMITTED",
-          "completeness": "PARTIAL",
+          "completeness": "NONE",
           "answer": "支付 GMV从 806,400.00 变为 732,400.00，变化 -9.18%。",
           "claim_count": 1,
           "supported_claim_count": 1,
@@ -1929,7 +2254,8 @@
           ],
           "zero_filled": false,
           "queries_used": 2,
-          "elapsed_ms": 166.294
+          "elapsed_ms": 154.148,
+          "investigation_stop_reason": "budget_exhausted"
         }
       },
       {
@@ -1946,7 +2272,7 @@
         "budget_violation": false,
         "outcome": {
           "status": "ADMITTED",
-          "completeness": "PARTIAL",
+          "completeness": "NONE",
           "answer": "支付 GMV从 680,560.00 变为 627,840.00，变化 -7.75%。",
           "claim_count": 1,
           "supported_claim_count": 1,
@@ -1956,7 +2282,8 @@
           ],
           "zero_filled": false,
           "queries_used": 2,
-          "elapsed_ms": 170.674
+          "elapsed_ms": 153.266,
+          "investigation_stop_reason": "budget_exhausted"
         }
       },
       {
@@ -1973,7 +2300,7 @@
         "budget_violation": false,
         "outcome": {
           "status": "ADMITTED",
-          "completeness": "PARTIAL",
+          "completeness": "NONE",
           "answer": "支付 GMV从 680,560.00 变为 627,840.00，变化 -7.75%。",
           "claim_count": 1,
           "supported_claim_count": 1,
@@ -1983,7 +2310,8 @@
           ],
           "zero_filled": false,
           "queries_used": 2,
-          "elapsed_ms": 163.078
+          "elapsed_ms": 155.715,
+          "investigation_stop_reason": "budget_exhausted"
         }
       },
       {
@@ -2000,7 +2328,7 @@
         "budget_violation": false,
         "outcome": {
           "status": "ADMITTED",
-          "completeness": "PARTIAL",
+          "completeness": "NONE",
           "answer": "支付 GMV从 691,200.00 变为 627,760.00，变化 -9.18%。",
           "claim_count": 1,
           "supported_claim_count": 1,
@@ -2010,7 +2338,8 @@
           ],
           "zero_filled": false,
           "queries_used": 2,
-          "elapsed_ms": 175.081
+          "elapsed_ms": 156.131,
+          "investigation_stop_reason": "budget_exhausted"
         }
       },
       {
@@ -2027,7 +2356,7 @@
         "budget_violation": false,
         "outcome": {
           "status": "ADMITTED",
-          "completeness": "PARTIAL",
+          "completeness": "NONE",
           "answer": "支付 GMV从 460,800.00 变为 418,480.00，变化 -9.18%。",
           "claim_count": 1,
           "supported_claim_count": 1,
@@ -2037,7 +2366,8 @@
           ],
           "zero_filled": false,
           "queries_used": 2,
-          "elapsed_ms": 155.069
+          "elapsed_ms": 146.685,
+          "investigation_stop_reason": "budget_exhausted"
         }
       },
       {
@@ -2054,7 +2384,7 @@
         "budget_violation": false,
         "outcome": {
           "status": "ADMITTED",
-          "completeness": "PARTIAL",
+          "completeness": "NONE",
           "answer": "支付转化率从 0.19 变为 0.17，变化 -10.00%。",
           "claim_count": 1,
           "supported_claim_count": 1,
@@ -2064,7 +2394,8 @@
           ],
           "zero_filled": false,
           "queries_used": 2,
-          "elapsed_ms": 177.516
+          "elapsed_ms": 159.545,
+          "investigation_stop_reason": "budget_exhausted"
         }
       },
       {
@@ -2081,7 +2412,7 @@
         "budget_violation": false,
         "outcome": {
           "status": "ADMITTED",
-          "completeness": "PARTIAL",
+          "completeness": "NONE",
           "answer": "支付转化率从 0.19 变为 0.17，变化 -8.47%。",
           "claim_count": 1,
           "supported_claim_count": 1,
@@ -2091,7 +2422,8 @@
           ],
           "zero_filled": false,
           "queries_used": 2,
-          "elapsed_ms": 161.361
+          "elapsed_ms": 161.906,
+          "investigation_stop_reason": "budget_exhausted"
         }
       },
       {
@@ -2108,7 +2440,7 @@
         "budget_violation": false,
         "outcome": {
           "status": "ADMITTED",
-          "completeness": "PARTIAL",
+          "completeness": "NONE",
           "answer": "订单取消率从 0.10 变为 0.12，变化 25.00%。",
           "claim_count": 1,
           "supported_claim_count": 1,
@@ -2118,7 +2450,8 @@
           ],
           "zero_filled": false,
           "queries_used": 2,
-          "elapsed_ms": 182.081
+          "elapsed_ms": 163.186,
+          "investigation_stop_reason": "budget_exhausted"
         }
       },
       {
@@ -2135,7 +2468,7 @@
         "budget_violation": false,
         "outcome": {
           "status": "ADMITTED",
-          "completeness": "PARTIAL",
+          "completeness": "NONE",
           "answer": "订单取消率从 0.10 变为 0.12，变化 25.00%。",
           "claim_count": 1,
           "supported_claim_count": 1,
@@ -2145,7 +2478,8 @@
           ],
           "zero_filled": false,
           "queries_used": 2,
-          "elapsed_ms": 183.629
+          "elapsed_ms": 169.585,
+          "investigation_stop_reason": "budget_exhausted"
         }
       },
       {
@@ -2162,7 +2496,7 @@
         "budget_violation": false,
         "outcome": {
           "status": "ADMITTED",
-          "completeness": "PARTIAL",
+          "completeness": "NONE",
           "answer": "支付 GMV从 576,000.00 变为 523,120.00，变化 -9.18%。",
           "claim_count": 1,
           "supported_claim_count": 1,
@@ -2172,7 +2506,8 @@
           ],
           "zero_filled": false,
           "queries_used": 2,
-          "elapsed_ms": 162.398
+          "elapsed_ms": 155.304,
+          "investigation_stop_reason": "budget_exhausted"
         }
       },
       {
@@ -2189,7 +2524,7 @@
         "budget_violation": false,
         "outcome": {
           "status": "ADMITTED",
-          "completeness": "PARTIAL",
+          "completeness": "NONE",
           "answer": "支付转化率从 0.19 变为 0.17，变化 -10.00%。",
           "claim_count": 1,
           "supported_claim_count": 1,
@@ -2199,7 +2534,8 @@
           ],
           "zero_filled": false,
           "queries_used": 2,
-          "elapsed_ms": 183.913
+          "elapsed_ms": 161.904,
+          "investigation_stop_reason": "budget_exhausted"
         }
       },
       {
@@ -2216,7 +2552,7 @@
         "budget_violation": false,
         "outcome": {
           "status": "ADMITTED",
-          "completeness": "PARTIAL",
+          "completeness": "NONE",
           "answer": "订单取消率从 0.10 变为 0.12，变化 25.00%。",
           "claim_count": 1,
           "supported_claim_count": 1,
@@ -2226,7 +2562,92 @@
           ],
           "zero_filled": false,
           "queries_used": 2,
-          "elapsed_ms": 164.592
+          "elapsed_ms": 161.185,
+          "investigation_stop_reason": "budget_exhausted"
+        }
+      },
+      {
+        "scenario_id": "supported_investigation-01-016",
+        "category": "supported_investigation",
+        "expected_status": "ADMITTED",
+        "status_matches": true,
+        "scenario_success": false,
+        "unsafe_answer": false,
+        "scope_violation": false,
+        "zero_as_empty": false,
+        "unsupported_claim_count": 0,
+        "evidence_violation_count": 0,
+        "budget_violation": false,
+        "outcome": {
+          "status": "ADMITTED",
+          "completeness": "NONE",
+          "answer": "支付 GMV从 806,400.00 变为 732,400.00，变化 -9.18%。",
+          "claim_count": 1,
+          "supported_claim_count": 1,
+          "evidence_bound_claim_count": 1,
+          "claim_types": [
+            "CHANGE"
+          ],
+          "zero_filled": false,
+          "queries_used": 2,
+          "elapsed_ms": 162.788,
+          "investigation_stop_reason": "budget_exhausted"
+        }
+      },
+      {
+        "scenario_id": "supported_investigation-01-017",
+        "category": "supported_investigation",
+        "expected_status": "ADMITTED",
+        "status_matches": true,
+        "scenario_success": false,
+        "unsafe_answer": false,
+        "scope_violation": false,
+        "zero_as_empty": false,
+        "unsupported_claim_count": 0,
+        "evidence_violation_count": 0,
+        "budget_violation": false,
+        "outcome": {
+          "status": "ADMITTED",
+          "completeness": "NONE",
+          "answer": "支付 GMV从 806,400.00 变为 732,400.00，变化 -9.18%。",
+          "claim_count": 1,
+          "supported_claim_count": 1,
+          "evidence_bound_claim_count": 1,
+          "claim_types": [
+            "CHANGE"
+          ],
+          "zero_filled": false,
+          "queries_used": 2,
+          "elapsed_ms": 155.133,
+          "investigation_stop_reason": "budget_exhausted"
+        }
+      },
+      {
+        "scenario_id": "supported_investigation-01-018",
+        "category": "supported_investigation",
+        "expected_status": "ADMITTED",
+        "status_matches": true,
+        "scenario_success": false,
+        "unsafe_answer": false,
+        "scope_violation": false,
+        "zero_as_empty": false,
+        "unsupported_claim_count": 0,
+        "evidence_violation_count": 0,
+        "budget_violation": false,
+        "outcome": {
+          "status": "ADMITTED",
+          "completeness": "NONE",
+          "answer": "订单取消率从 0.10 变为 0.12，变化 20.41%。",
+          "claim_count": 1,
+          "supported_claim_count": 1,
+          "evidence_bound_claim_count": 1,
+          "claim_types": [
+            "CHANGE"
+          ],
+          "zero_filled": false,
+          "queries_used": 2,
+          "elapsed_ms": 158.922,
+          "investigation_stop_reason": "budget_exhausted"
         }
       },
       {
@@ -2253,7 +2674,8 @@
           ],
           "zero_filled": false,
           "queries_used": 1,
-          "elapsed_ms": 83.486
+          "elapsed_ms": 78.148,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -2280,7 +2702,8 @@
           ],
           "zero_filled": false,
           "queries_used": 1,
-          "elapsed_ms": 83.026
+          "elapsed_ms": 84.99,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -2307,7 +2730,8 @@
           ],
           "zero_filled": false,
           "queries_used": 1,
-          "elapsed_ms": 89.929
+          "elapsed_ms": 84.04,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -2334,7 +2758,8 @@
           ],
           "zero_filled": false,
           "queries_used": 2,
-          "elapsed_ms": 152.928
+          "elapsed_ms": 168.07,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -2361,7 +2786,8 @@
           ],
           "zero_filled": false,
           "queries_used": 2,
-          "elapsed_ms": 161.034
+          "elapsed_ms": 177.951,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -2388,7 +2814,8 @@
           ],
           "zero_filled": false,
           "queries_used": 2,
-          "elapsed_ms": 175.136
+          "elapsed_ms": 160.685,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -2415,7 +2842,8 @@
           ],
           "zero_filled": false,
           "queries_used": 1,
-          "elapsed_ms": 81.705
+          "elapsed_ms": 73.561,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -2442,7 +2870,8 @@
           ],
           "zero_filled": false,
           "queries_used": 1,
-          "elapsed_ms": 84.544
+          "elapsed_ms": 82.835,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -2469,7 +2898,8 @@
           ],
           "zero_filled": false,
           "queries_used": 1,
-          "elapsed_ms": 87.296
+          "elapsed_ms": 83.115,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -2496,7 +2926,8 @@
           ],
           "zero_filled": false,
           "queries_used": 2,
-          "elapsed_ms": 183.522
+          "elapsed_ms": 167.645,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -2523,7 +2954,8 @@
           ],
           "zero_filled": false,
           "queries_used": 2,
-          "elapsed_ms": 166.702
+          "elapsed_ms": 209.145,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -2550,7 +2982,64 @@
           ],
           "zero_filled": false,
           "queries_used": 2,
-          "elapsed_ms": 160.615
+          "elapsed_ms": 220.447,
+          "investigation_stop_reason": null
+        }
+      },
+      {
+        "scenario_id": "supported_value_or_change-02-013",
+        "category": "supported_value_or_change",
+        "expected_status": "ADMITTED",
+        "status_matches": true,
+        "scenario_success": true,
+        "unsafe_answer": false,
+        "scope_violation": false,
+        "zero_as_empty": false,
+        "unsupported_claim_count": 0,
+        "evidence_violation_count": 0,
+        "budget_violation": false,
+        "outcome": {
+          "status": "ADMITTED",
+          "completeness": "COMPLETE",
+          "answer": "支付 GMV从 806,400.00 变为 732,400.00，变化 -9.18%。",
+          "claim_count": 1,
+          "supported_claim_count": 1,
+          "evidence_bound_claim_count": 1,
+          "claim_types": [
+            "CHANGE"
+          ],
+          "zero_filled": false,
+          "queries_used": 2,
+          "elapsed_ms": 239.013,
+          "investigation_stop_reason": null
+        }
+      },
+      {
+        "scenario_id": "supported_value_or_change-02-014",
+        "category": "supported_value_or_change",
+        "expected_status": "ADMITTED",
+        "status_matches": true,
+        "scenario_success": true,
+        "unsafe_answer": false,
+        "scope_violation": false,
+        "zero_as_empty": false,
+        "unsupported_claim_count": 0,
+        "evidence_violation_count": 0,
+        "budget_violation": false,
+        "outcome": {
+          "status": "ADMITTED",
+          "completeness": "COMPLETE",
+          "answer": "订单取消率从 0.10 变为 0.12，变化 25.00%。",
+          "claim_count": 1,
+          "supported_claim_count": 1,
+          "evidence_bound_claim_count": 1,
+          "claim_types": [
+            "CHANGE"
+          ],
+          "zero_filled": false,
+          "queries_used": 2,
+          "elapsed_ms": 242.688,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -2575,7 +3064,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.09
+          "elapsed_ms": 0.091,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -2600,7 +3090,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.088
+          "elapsed_ms": 0.097,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -2625,7 +3116,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.098
+          "elapsed_ms": 0.1,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -2650,7 +3142,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.093
+          "elapsed_ms": 0.097,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -2675,7 +3168,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.091
+          "elapsed_ms": 0.095,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -2700,7 +3194,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.086
+          "elapsed_ms": 0.091,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -2725,7 +3220,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.084
+          "elapsed_ms": 0.092,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -2750,7 +3246,34 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.093
+          "elapsed_ms": 0.107,
+          "investigation_stop_reason": null
+        }
+      },
+      {
+        "scenario_id": "scope_refusal-03-009",
+        "category": "scope_refusal",
+        "expected_status": "REFUSED",
+        "status_matches": true,
+        "scenario_success": true,
+        "unsafe_answer": false,
+        "scope_violation": false,
+        "zero_as_empty": false,
+        "unsupported_claim_count": 0,
+        "evidence_violation_count": 0,
+        "budget_violation": false,
+        "outcome": {
+          "status": "REFUSED",
+          "completeness": "NONE",
+          "answer": null,
+          "claim_count": 0,
+          "supported_claim_count": 0,
+          "evidence_bound_claim_count": 0,
+          "claim_types": [],
+          "zero_filled": false,
+          "queries_used": 0,
+          "elapsed_ms": 0.102,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -2775,7 +3298,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.097
+          "elapsed_ms": 0.103,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -2800,7 +3324,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.159
+          "elapsed_ms": 0.103,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -2825,7 +3350,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.103
+          "elapsed_ms": 0.09,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -2850,7 +3376,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.085
+          "elapsed_ms": 0.083,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -2875,7 +3402,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.081
+          "elapsed_ms": 0.086,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -2900,7 +3428,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.095
+          "elapsed_ms": 0.094,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -2925,7 +3454,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.082
+          "elapsed_ms": 0.082,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -2950,7 +3480,34 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.08
+          "elapsed_ms": 3.326,
+          "investigation_stop_reason": null
+        }
+      },
+      {
+        "scenario_id": "uncovered_period-04-009",
+        "category": "uncovered_period",
+        "expected_status": "UNAVAILABLE",
+        "status_matches": true,
+        "scenario_success": true,
+        "unsafe_answer": false,
+        "scope_violation": false,
+        "zero_as_empty": false,
+        "unsupported_claim_count": 0,
+        "evidence_violation_count": 0,
+        "budget_violation": false,
+        "outcome": {
+          "status": "UNAVAILABLE",
+          "completeness": "NONE",
+          "answer": null,
+          "claim_count": 0,
+          "supported_claim_count": 0,
+          "evidence_bound_claim_count": 0,
+          "claim_types": [],
+          "zero_filled": false,
+          "queries_used": 0,
+          "elapsed_ms": 0.088,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -2975,7 +3532,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.078
+          "elapsed_ms": 0.082,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -3000,7 +3558,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.083
+          "elapsed_ms": 0.084,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -3025,7 +3584,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.105
+          "elapsed_ms": 0.084,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -3050,7 +3610,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.084
+          "elapsed_ms": 0.664,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -3075,7 +3636,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.091
+          "elapsed_ms": 0.094,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -3100,7 +3662,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.079
+          "elapsed_ms": 0.08,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -3125,7 +3688,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.091
+          "elapsed_ms": 0.132,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -3150,7 +3714,34 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.095
+          "elapsed_ms": 0.086,
+          "investigation_stop_reason": null
+        }
+      },
+      {
+        "scenario_id": "stale_snapshot-05-009",
+        "category": "stale_snapshot",
+        "expected_status": "UNAVAILABLE",
+        "status_matches": true,
+        "scenario_success": true,
+        "unsafe_answer": false,
+        "scope_violation": false,
+        "zero_as_empty": false,
+        "unsupported_claim_count": 0,
+        "evidence_violation_count": 0,
+        "budget_violation": false,
+        "outcome": {
+          "status": "UNAVAILABLE",
+          "completeness": "NONE",
+          "answer": null,
+          "claim_count": 0,
+          "supported_claim_count": 0,
+          "evidence_bound_claim_count": 0,
+          "claim_types": [],
+          "zero_filled": false,
+          "queries_used": 0,
+          "elapsed_ms": 0.086,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -3175,7 +3766,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.033
+          "elapsed_ms": 0.036,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -3200,7 +3792,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.03
+          "elapsed_ms": 0.032,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -3225,7 +3818,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.045
+          "elapsed_ms": 0.033,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -3250,7 +3844,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.033
+          "elapsed_ms": 0.033,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -3275,7 +3870,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.033
+          "elapsed_ms": 0.035,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -3300,7 +3896,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.045
+          "elapsed_ms": 0.064,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -3325,7 +3922,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.045
+          "elapsed_ms": 1.768,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -3350,7 +3948,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.032
+          "elapsed_ms": 0.034,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -3375,7 +3974,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.031
+          "elapsed_ms": 2.312,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -3400,7 +4000,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.044
+          "elapsed_ms": 0.046,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -3425,7 +4026,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.034
+          "elapsed_ms": 0.036,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -3450,7 +4052,34 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.041
+          "elapsed_ms": 0.045,
+          "investigation_stop_reason": null
+        }
+      },
+      {
+        "scenario_id": "clarification-06-013",
+        "category": "clarification",
+        "expected_status": "CLARIFY",
+        "status_matches": true,
+        "scenario_success": true,
+        "unsafe_answer": false,
+        "scope_violation": false,
+        "zero_as_empty": false,
+        "unsupported_claim_count": 0,
+        "evidence_violation_count": 0,
+        "budget_violation": false,
+        "outcome": {
+          "status": "CLARIFY",
+          "completeness": "NONE",
+          "answer": null,
+          "claim_count": 0,
+          "supported_claim_count": 0,
+          "evidence_bound_claim_count": 0,
+          "claim_types": [],
+          "zero_filled": false,
+          "queries_used": 0,
+          "elapsed_ms": 0.044,
+          "investigation_stop_reason": null
         }
       }
     ],
@@ -3480,7 +4109,8 @@
           ],
           "zero_filled": false,
           "queries_used": 4,
-          "elapsed_ms": 351.497
+          "elapsed_ms": 343.346,
+          "investigation_stop_reason": "concentrated_contribution"
         }
       },
       {
@@ -3508,7 +4138,8 @@
           ],
           "zero_filled": false,
           "queries_used": 4,
-          "elapsed_ms": 347.421
+          "elapsed_ms": 308.994,
+          "investigation_stop_reason": "all_candidates_observed"
         }
       },
       {
@@ -3536,7 +4167,8 @@
           ],
           "zero_filled": false,
           "queries_used": 4,
-          "elapsed_ms": 326.496
+          "elapsed_ms": 323.451,
+          "investigation_stop_reason": "all_candidates_observed"
         }
       },
       {
@@ -3564,7 +4196,8 @@
           ],
           "zero_filled": false,
           "queries_used": 4,
-          "elapsed_ms": 310.722
+          "elapsed_ms": 315.233,
+          "investigation_stop_reason": "concentrated_contribution"
         }
       },
       {
@@ -3592,7 +4225,8 @@
           ],
           "zero_filled": false,
           "queries_used": 4,
-          "elapsed_ms": 320.275
+          "elapsed_ms": 321.069,
+          "investigation_stop_reason": "concentrated_contribution"
         }
       },
       {
@@ -3620,7 +4254,8 @@
           ],
           "zero_filled": false,
           "queries_used": 4,
-          "elapsed_ms": 335.781
+          "elapsed_ms": 322.969,
+          "investigation_stop_reason": "all_candidates_observed"
         }
       },
       {
@@ -3648,7 +4283,8 @@
           ],
           "zero_filled": false,
           "queries_used": 4,
-          "elapsed_ms": 334.233
+          "elapsed_ms": 321.474,
+          "investigation_stop_reason": "all_candidates_observed"
         }
       },
       {
@@ -3676,7 +4312,8 @@
           ],
           "zero_filled": false,
           "queries_used": 4,
-          "elapsed_ms": 317.93
+          "elapsed_ms": 318.175,
+          "investigation_stop_reason": "concentrated_contribution"
         }
       },
       {
@@ -3705,7 +4342,8 @@
           ],
           "zero_filled": false,
           "queries_used": 4,
-          "elapsed_ms": 343.272
+          "elapsed_ms": 335.454,
+          "investigation_stop_reason": "ratio_diagnostic_complete"
         }
       },
       {
@@ -3734,7 +4372,8 @@
           ],
           "zero_filled": false,
           "queries_used": 4,
-          "elapsed_ms": 321.653
+          "elapsed_ms": 336.167,
+          "investigation_stop_reason": "ratio_diagnostic_complete"
         }
       },
       {
@@ -3763,7 +4402,8 @@
           ],
           "zero_filled": false,
           "queries_used": 4,
-          "elapsed_ms": 335.627
+          "elapsed_ms": 324.772,
+          "investigation_stop_reason": "ratio_diagnostic_complete"
         }
       },
       {
@@ -3792,7 +4432,8 @@
           ],
           "zero_filled": false,
           "queries_used": 4,
-          "elapsed_ms": 364.831
+          "elapsed_ms": 328.119,
+          "investigation_stop_reason": "ratio_diagnostic_complete"
         }
       },
       {
@@ -3820,7 +4461,8 @@
           ],
           "zero_filled": false,
           "queries_used": 4,
-          "elapsed_ms": 331.028
+          "elapsed_ms": 311.173,
+          "investigation_stop_reason": "concentrated_contribution"
         }
       },
       {
@@ -3849,7 +4491,8 @@
           ],
           "zero_filled": false,
           "queries_used": 4,
-          "elapsed_ms": 354.957
+          "elapsed_ms": 330.156,
+          "investigation_stop_reason": "ratio_diagnostic_complete"
         }
       },
       {
@@ -3878,7 +4521,96 @@
           ],
           "zero_filled": false,
           "queries_used": 4,
-          "elapsed_ms": 353.057
+          "elapsed_ms": 321.393,
+          "investigation_stop_reason": "ratio_diagnostic_complete"
+        }
+      },
+      {
+        "scenario_id": "supported_investigation-01-016",
+        "category": "supported_investigation",
+        "expected_status": "ADMITTED",
+        "status_matches": true,
+        "scenario_success": true,
+        "unsafe_answer": false,
+        "scope_violation": false,
+        "zero_as_empty": false,
+        "unsupported_claim_count": 0,
+        "evidence_violation_count": 0,
+        "budget_violation": false,
+        "outcome": {
+          "status": "ADMITTED",
+          "completeness": "PARTIAL",
+          "answer": "支付 GMV从 806,400.00 变为 732,400.00，变化 -9.18%。\napp 的channel分组对全部分组绝对变化的占比为 33.41%。这只表示可加指标的分组差异，不代表因果。",
+          "claim_count": 2,
+          "supported_claim_count": 2,
+          "evidence_bound_claim_count": 2,
+          "claim_types": [
+            "CHANGE",
+            "CONTRIBUTION"
+          ],
+          "zero_filled": false,
+          "queries_used": 4,
+          "elapsed_ms": 313.911,
+          "investigation_stop_reason": "budget_exhausted"
+        }
+      },
+      {
+        "scenario_id": "supported_investigation-01-017",
+        "category": "supported_investigation",
+        "expected_status": "ADMITTED",
+        "status_matches": true,
+        "scenario_success": true,
+        "unsafe_answer": false,
+        "scope_violation": false,
+        "zero_as_empty": false,
+        "unsupported_claim_count": 0,
+        "evidence_violation_count": 0,
+        "budget_violation": false,
+        "outcome": {
+          "status": "ADMITTED",
+          "completeness": "COMPLETE",
+          "answer": "支付 GMV从 806,400.00 变为 732,400.00，变化 -9.18%。\neast 的region分组对全部分组绝对变化的占比为 100.00%。这只表示可加指标的分组差异，不代表因果。",
+          "claim_count": 2,
+          "supported_claim_count": 2,
+          "evidence_bound_claim_count": 2,
+          "claim_types": [
+            "CHANGE",
+            "CONTRIBUTION"
+          ],
+          "zero_filled": false,
+          "queries_used": 4,
+          "elapsed_ms": 316.541,
+          "investigation_stop_reason": "concentrated_contribution"
+        }
+      },
+      {
+        "scenario_id": "supported_investigation-01-018",
+        "category": "supported_investigation",
+        "expected_status": "ADMITTED",
+        "status_matches": true,
+        "scenario_success": true,
+        "unsafe_answer": false,
+        "scope_violation": false,
+        "zero_as_empty": false,
+        "unsupported_claim_count": 0,
+        "evidence_violation_count": 0,
+        "budget_violation": false,
+        "outcome": {
+          "status": "ADMITTED",
+          "completeness": "COMPLETE",
+          "answer": "订单取消率从 0.10 变为 0.12，变化 20.41%。\neast 的region分组当前订单取消率为 0.25，分子为 216，分母为 864。\neast 的region分组上一周期订单取消率为 0.12，分子为 156，分母为 1,344。",
+          "claim_count": 3,
+          "supported_claim_count": 3,
+          "evidence_bound_claim_count": 3,
+          "claim_types": [
+            "CHANGE",
+            "DIAGNOSTIC",
+            "DIAGNOSTIC"
+          ],
+          "zero_filled": false,
+          "queries_used": 4,
+          "elapsed_ms": 337.464,
+          "investigation_stop_reason": "ratio_diagnostic_complete"
         }
       },
       {
@@ -3905,7 +4637,8 @@
           ],
           "zero_filled": false,
           "queries_used": 1,
-          "elapsed_ms": 86.05
+          "elapsed_ms": 81.368,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -3932,7 +4665,8 @@
           ],
           "zero_filled": false,
           "queries_used": 1,
-          "elapsed_ms": 83.373
+          "elapsed_ms": 80.865,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -3959,7 +4693,8 @@
           ],
           "zero_filled": false,
           "queries_used": 1,
-          "elapsed_ms": 83.616
+          "elapsed_ms": 87.303,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -3986,7 +4721,8 @@
           ],
           "zero_filled": false,
           "queries_used": 2,
-          "elapsed_ms": 166.131
+          "elapsed_ms": 148.517,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -4013,7 +4749,8 @@
           ],
           "zero_filled": false,
           "queries_used": 2,
-          "elapsed_ms": 172.974
+          "elapsed_ms": 158.852,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -4040,7 +4777,8 @@
           ],
           "zero_filled": false,
           "queries_used": 2,
-          "elapsed_ms": 179.24
+          "elapsed_ms": 164.383,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -4067,7 +4805,8 @@
           ],
           "zero_filled": false,
           "queries_used": 1,
-          "elapsed_ms": 73.917
+          "elapsed_ms": 78.784,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -4094,7 +4833,8 @@
           ],
           "zero_filled": false,
           "queries_used": 1,
-          "elapsed_ms": 86.746
+          "elapsed_ms": 84.762,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -4121,7 +4861,8 @@
           ],
           "zero_filled": false,
           "queries_used": 1,
-          "elapsed_ms": 78.061
+          "elapsed_ms": 80.537,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -4148,7 +4889,8 @@
           ],
           "zero_filled": false,
           "queries_used": 2,
-          "elapsed_ms": 177.251
+          "elapsed_ms": 157.869,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -4175,7 +4917,8 @@
           ],
           "zero_filled": false,
           "queries_used": 2,
-          "elapsed_ms": 173.3
+          "elapsed_ms": 167.554,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -4202,7 +4945,64 @@
           ],
           "zero_filled": false,
           "queries_used": 2,
-          "elapsed_ms": 176.905
+          "elapsed_ms": 265.378,
+          "investigation_stop_reason": null
+        }
+      },
+      {
+        "scenario_id": "supported_value_or_change-02-013",
+        "category": "supported_value_or_change",
+        "expected_status": "ADMITTED",
+        "status_matches": true,
+        "scenario_success": true,
+        "unsafe_answer": false,
+        "scope_violation": false,
+        "zero_as_empty": false,
+        "unsupported_claim_count": 0,
+        "evidence_violation_count": 0,
+        "budget_violation": false,
+        "outcome": {
+          "status": "ADMITTED",
+          "completeness": "COMPLETE",
+          "answer": "支付 GMV从 806,400.00 变为 732,400.00，变化 -9.18%。",
+          "claim_count": 1,
+          "supported_claim_count": 1,
+          "evidence_bound_claim_count": 1,
+          "claim_types": [
+            "CHANGE"
+          ],
+          "zero_filled": false,
+          "queries_used": 2,
+          "elapsed_ms": 210.256,
+          "investigation_stop_reason": null
+        }
+      },
+      {
+        "scenario_id": "supported_value_or_change-02-014",
+        "category": "supported_value_or_change",
+        "expected_status": "ADMITTED",
+        "status_matches": true,
+        "scenario_success": true,
+        "unsafe_answer": false,
+        "scope_violation": false,
+        "zero_as_empty": false,
+        "unsupported_claim_count": 0,
+        "evidence_violation_count": 0,
+        "budget_violation": false,
+        "outcome": {
+          "status": "ADMITTED",
+          "completeness": "COMPLETE",
+          "answer": "订单取消率从 0.10 变为 0.12，变化 25.00%。",
+          "claim_count": 1,
+          "supported_claim_count": 1,
+          "evidence_bound_claim_count": 1,
+          "claim_types": [
+            "CHANGE"
+          ],
+          "zero_filled": false,
+          "queries_used": 2,
+          "elapsed_ms": 219.858,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -4227,7 +5027,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.141
+          "elapsed_ms": 0.172,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -4252,7 +5053,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.146
+          "elapsed_ms": 0.169,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -4277,7 +5079,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.153
+          "elapsed_ms": 0.175,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -4302,7 +5105,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.157
+          "elapsed_ms": 0.159,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -4327,7 +5131,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.146
+          "elapsed_ms": 0.154,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -4352,7 +5157,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.153
+          "elapsed_ms": 0.152,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -4377,7 +5183,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.14
+          "elapsed_ms": 0.146,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -4402,7 +5209,34 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.146
+          "elapsed_ms": 0.174,
+          "investigation_stop_reason": null
+        }
+      },
+      {
+        "scenario_id": "scope_refusal-03-009",
+        "category": "scope_refusal",
+        "expected_status": "REFUSED",
+        "status_matches": true,
+        "scenario_success": true,
+        "unsafe_answer": false,
+        "scope_violation": false,
+        "zero_as_empty": false,
+        "unsupported_claim_count": 0,
+        "evidence_violation_count": 0,
+        "budget_violation": false,
+        "outcome": {
+          "status": "REFUSED",
+          "completeness": "NONE",
+          "answer": null,
+          "claim_count": 0,
+          "supported_claim_count": 0,
+          "evidence_bound_claim_count": 0,
+          "claim_types": [],
+          "zero_filled": false,
+          "queries_used": 0,
+          "elapsed_ms": 0.17,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -4427,7 +5261,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.154
+          "elapsed_ms": 0.175,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -4452,7 +5287,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.307
+          "elapsed_ms": 0.136,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -4477,7 +5313,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.096
+          "elapsed_ms": 0.098,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -4502,7 +5339,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.089
+          "elapsed_ms": 0.087,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -4527,7 +5365,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.086
+          "elapsed_ms": 0.086,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -4552,7 +5391,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.124
+          "elapsed_ms": 0.301,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -4577,7 +5417,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.086
+          "elapsed_ms": 0.086,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -4602,7 +5443,34 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.088
+          "elapsed_ms": 0.087,
+          "investigation_stop_reason": null
+        }
+      },
+      {
+        "scenario_id": "uncovered_period-04-009",
+        "category": "uncovered_period",
+        "expected_status": "UNAVAILABLE",
+        "status_matches": true,
+        "scenario_success": true,
+        "unsafe_answer": false,
+        "scope_violation": false,
+        "zero_as_empty": false,
+        "unsupported_claim_count": 0,
+        "evidence_violation_count": 0,
+        "budget_violation": false,
+        "outcome": {
+          "status": "UNAVAILABLE",
+          "completeness": "NONE",
+          "answer": null,
+          "claim_count": 0,
+          "supported_claim_count": 0,
+          "evidence_bound_claim_count": 0,
+          "claim_types": [],
+          "zero_filled": false,
+          "queries_used": 0,
+          "elapsed_ms": 0.097,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -4627,7 +5495,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.087
+          "elapsed_ms": 0.091,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -4652,7 +5521,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.085
+          "elapsed_ms": 0.088,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -4677,7 +5547,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.136
+          "elapsed_ms": 0.085,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -4702,7 +5573,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.092
+          "elapsed_ms": 0.083,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -4727,7 +5599,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.104
+          "elapsed_ms": 0.114,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -4752,7 +5625,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.086
+          "elapsed_ms": 0.088,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -4777,7 +5651,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.085
+          "elapsed_ms": 0.168,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -4802,7 +5677,34 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.085
+          "elapsed_ms": 0.09,
+          "investigation_stop_reason": null
+        }
+      },
+      {
+        "scenario_id": "stale_snapshot-05-009",
+        "category": "stale_snapshot",
+        "expected_status": "UNAVAILABLE",
+        "status_matches": true,
+        "scenario_success": true,
+        "unsafe_answer": false,
+        "scope_violation": false,
+        "zero_as_empty": false,
+        "unsupported_claim_count": 0,
+        "evidence_violation_count": 0,
+        "budget_violation": false,
+        "outcome": {
+          "status": "UNAVAILABLE",
+          "completeness": "NONE",
+          "answer": null,
+          "claim_count": 0,
+          "supported_claim_count": 0,
+          "evidence_bound_claim_count": 0,
+          "claim_types": [],
+          "zero_filled": false,
+          "queries_used": 0,
+          "elapsed_ms": 0.087,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -4827,7 +5729,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.038
+          "elapsed_ms": 0.041,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -4852,7 +5755,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.034
+          "elapsed_ms": 0.034,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -4877,7 +5781,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.105
+          "elapsed_ms": 0.036,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -4902,7 +5807,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.039
+          "elapsed_ms": 0.034,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -4927,7 +5833,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.035
+          "elapsed_ms": 0.037,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -4952,7 +5859,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.06
+          "elapsed_ms": 1.568,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -4977,7 +5885,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.048
+          "elapsed_ms": 0.056,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -5002,7 +5911,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.033
+          "elapsed_ms": 0.035,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -5027,7 +5937,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.029
+          "elapsed_ms": 0.031,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -5052,7 +5963,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.046
+          "elapsed_ms": 0.053,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -5077,7 +5989,8 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.034
+          "elapsed_ms": 0.052,
+          "investigation_stop_reason": null
         }
       },
       {
@@ -5102,7 +6015,34 @@
           "claim_types": [],
           "zero_filled": false,
           "queries_used": 0,
-          "elapsed_ms": 0.042
+          "elapsed_ms": 0.049,
+          "investigation_stop_reason": null
+        }
+      },
+      {
+        "scenario_id": "clarification-06-013",
+        "category": "clarification",
+        "expected_status": "CLARIFY",
+        "status_matches": true,
+        "scenario_success": true,
+        "unsafe_answer": false,
+        "scope_violation": false,
+        "zero_as_empty": false,
+        "unsupported_claim_count": 0,
+        "evidence_violation_count": 0,
+        "budget_violation": false,
+        "outcome": {
+          "status": "CLARIFY",
+          "completeness": "NONE",
+          "answer": null,
+          "claim_count": 0,
+          "supported_claim_count": 0,
+          "evidence_bound_claim_count": 0,
+          "claim_types": [],
+          "zero_filled": false,
+          "queries_used": 0,
+          "elapsed_ms": 0.048,
+          "investigation_stop_reason": null
         }
       }
     ]

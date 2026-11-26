@@ -1,11 +1,11 @@
 # MetricLedger Planner Comparison
 
-> 生成时间：`2026-11-25T16:34:56+00:00`
+> 生成时间：`2026-11-26T06:36:20+00:00`
 > 输入只包含指标观察摘要、允许维度和剩余查询预算；模型不会接触原始事件行。
 
 ## 场景
 
-- 支持调查场景：**15**
+- 支持调查场景：**18**
 - 候选维度暴露：`True`
 - 原始事件行暴露：`False`
 
@@ -13,28 +13,22 @@
 
 | 指标 | 值 |
 |---|---:|
-| 用例数 | 15 |
+| 用例数 | 18 |
 | 失败率 | 0.00% |
 | 回退率 | 0.00% |
-| P50 延迟 | 0.004 ms |
-| P95 延迟 | 0.013 ms |
-| 最大延迟 | 0.013 ms |
+| P50 延迟 | 0.014 ms |
+| P95 延迟 | 0.037 ms |
+| 最大延迟 | 0.037 ms |
+| 完整 Token 用量 | 18 |
+| Planner Token | 0 |
 
 ## OpenAI-compatible planner
 
-- 模型标签：`api.deepseek.com/deepseek-chat`
-- 凭证/端点已配置：`True`
-- 失败率：`0.00%`
-- 回退率：`0.00%`
+**NOT_RUN**
 
-| 指标 | 值 |
-|---|---:|
-| 用例数 | 15 |
-| 失败率 | 0.00% |
-| 回退率 | 0.00% |
-| P50 延迟 | 915.992 ms |
-| P95 延迟 | 1591.464 ms |
-| 最大延迟 | 1591.464 ms |
+原因：No METRICLEDGER_PLANNER_BASE_URL and METRICLEDGER_PLANNER_MODEL were configured. No model latency or quality can be claimed.
+
+因此本轮没有模型失败率、延迟或回退率结论。
 
 ## 口径
 

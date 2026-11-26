@@ -52,7 +52,7 @@ def main() -> None:
 
     evaluation = _get_json(f"{base_url}/api/eval/latest")
     assert evaluation["status"] == "COMPLETE"
-    assert evaluation["scenario_count"] == 63
+    assert evaluation["scenario_count"] >= 72
 
     analysis = _post_json(f"{base_url}/api/analyses", ANALYSIS_REQUEST)
     assert analysis["admission"]["status"] == "ADMITTED"
@@ -60,6 +60,9 @@ def main() -> None:
     assert len(analysis["claims"]) >= 2
     assert all(claim["evidence_refs"] for claim in analysis["claims"])
     assert analysis["budget_usage"]["queries_used"] == 4
+    assert analysis["budget_usage"]["planner_usage_complete"] is True
+    assert analysis["budget_usage"]["planner_tokens_used"] >= 0
+    assert analysis["investigation"]["rounds"]
     assert len(analysis["sql_audit"]) == 4
     assert all(
         audit["sql"].lstrip().upper().startswith("SELECT")
@@ -76,6 +79,9 @@ def main() -> None:
     metrics = _get_text(f"{base_url}/api/metrics")
     assert "metricledger_http_requests_total" in metrics
     assert "metricledger_duckdb_queries_total" in metrics
+    assert "metricledger_planner_calls_total" in metrics
+    assert "metricledger_planner_tokens_total" in metrics
+    assert "metricledger_investigation_steps_total" in metrics
 
     print(
         "container smoke: ok "

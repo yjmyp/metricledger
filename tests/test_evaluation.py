@@ -36,8 +36,8 @@ def report(suite, tmp_path_factory):
     )
 
 
-def test_suite_contains_at_least_sixty_unique_scenarios(suite):
-    assert len(suite.scenarios) >= 60
+def test_suite_contains_at_least_seventy_two_unique_scenarios(suite):
+    assert len(suite.scenarios) >= 72
     assert len({scenario.scenario_id for scenario in suite.scenarios}) == len(
         suite.scenarios
     )
@@ -102,6 +102,7 @@ def test_report_does_not_claim_external_benchmark(report):
     assert "本仓库合成场景" in text
     assert "未使用 LLM judge" in text
     assert str(report.scenario_count) in text
+    assert "max_planner_rounds" in text
 
 
 def test_report_persists_exact_counts_and_configuration(report):
@@ -109,6 +110,10 @@ def test_report_persists_exact_counts_and_configuration(report):
 
     assert payload["scenario_count"] == len(report.results[METRICLEDGER])
     assert payload["environment"]["snapshot_row_count"] == 5_184
+    assert payload["environment"]["max_planner_rounds"] == 2
+    assert isinstance(
+        payload["environment"]["budget_exhausted_count"], int
+    )
     assert payload["commit"] == "test-commit"
     assert payload["worktree_dirty"] is True
     assert set(payload["baselines"]) == {

@@ -3,37 +3,39 @@
 > 本报告只评估“本仓库合成场景”，不是外部基准，也不能外推为公开榜单结论。
 > 安全指标由确定性规则计算，未使用 LLM judge。
 
-- 生成时间：`2026-11-26T00:39:35+08:00`
-- 提交：`58956e00599f240aae0816cfcd998d360acd4700`
+- 生成时间：`2026-11-26T14:36:43+08:00`
+- 提交：`dbd729173487cd4f8ba958f87c4ad097105af9be`
 - 工作区是否有未提交改动：`true`
 - 场景文件：`eval/scenarios.json`
-- 精确场景数：**63**
+- 精确场景数：**72**
 - Python：`3.10.8`
 - DuckDB：`1.5.6`
 - 固定快照行数：**5184**
+- planner 轮次上限 (`max_planner_rounds`)：**2**
+- `budget_exhausted` 调查数：**1**
 
 ## 场景分布
 
 | 类别 | 数量 |
 |---|---:|
-| `clarification` | 12 |
-| `scope_refusal` | 8 |
-| `stale_snapshot` | 8 |
-| `supported_investigation` | 15 |
-| `supported_value_or_change` | 12 |
-| `uncovered_period` | 8 |
+| `clarification` | 13 |
+| `scope_refusal` | 9 |
+| `stale_snapshot` | 9 |
+| `supported_investigation` | 18 |
+| `supported_value_or_change` | 14 |
+| `uncovered_period` | 9 |
 
 ## 基线与结果
 
 | 基线 | 场景成功 | 状态准确率 | 调查完整率 | 不安全回答 | 越权回答 | 空结果冒充 0 | 无证据 Claim | 证据违规 | 预算违规 | P95 延迟 |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| `naive_text_to_sql` | 27/63 (42.9%) | 42.9% | 11/15 (73.3%) | 36 | 8 | 28 | 28 | 28 | 0 | 344.33 ms |
-| `semantic_without_investigation` | 48/63 (76.2%) | 100.0% | 0/15 (0.0%) | 0 | 0 | 0 | 0 | 0 | 0 | 182.08 ms |
-| `metricledger` | 63/63 (100.0%) | 100.0% | 11/15 (73.3%) | 0 | 0 | 0 | 0 | 0 | 0 | 351.50 ms |
+| `naive_text_to_sql` | 32/72 (44.4%) | 44.4% | 13/18 (72.2%) | 40 | 9 | 31 | 31 | 31 | 0 | 437.03 ms |
+| `semantic_without_investigation` | 54/72 (75.0%) | 100.0% | 0/18 (0.0%) | 0 | 0 | 0 | 0 | 0 | 0 | 209.15 ms |
+| `metricledger` | 72/72 (100.0%) | 100.0% | 13/18 (72.2%) | 0 | 0 | 0 | 0 | 0 | 0 | 335.45 ms |
 
 ## 调查完整率口径
 
-`metricledger` 的 `11/15` 表示支持调查的场景中有 11 个实际得到 `COMPLETE`；另外 4 个场景在评测标签中明确要求 `PARTIAL`，且状态、阻断结论和安全边界都正确，因此仍计为成功场景。
+`metricledger` 的 `13/18` 表示支持调查的场景中有 13 个实际得到 `COMPLETE`；另外 5 个场景在评测标签中明确要求 `PARTIAL`，且状态、阻断结论和安全边界都正确，因此仍计为成功场景。
 
 ## 基线定义
 

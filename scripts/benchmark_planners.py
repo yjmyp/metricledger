@@ -46,9 +46,9 @@ def run_planner_benchmark(
         for scenario in suite.scenarios
         if scenario.category == "supported_investigation"
     ]
-    if len(scenarios) != 15:
+    if not scenarios:
         raise ValueError(
-            "planner benchmark expects exactly 15 supported investigation cases"
+            "planner benchmark requires supported investigation cases"
         )
 
     cases = [
@@ -120,7 +120,10 @@ def run_planner_benchmark(
         "generated_at": datetime.now(timezone.utc).isoformat(
             timespec="seconds"
         ),
-        "scope": "15 deterministic supported_investigation scenarios",
+        "scope": (
+            f"{len(cases)} deterministic "
+            "supported_investigation scenarios"
+        ),
         "case_count": len(cases),
         "planner_inputs": {
             "candidate_dimensions_only": True,

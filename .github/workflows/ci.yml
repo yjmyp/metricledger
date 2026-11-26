@@ -29,15 +29,17 @@ jobs:
           import json
           from pathlib import Path
           report = json.loads(Path("eval/results.json").read_text(encoding="utf-8"))
-          assert report["scenario_count"] == 63, report["scenario_count"]
+          count = report["scenario_count"]
+          assert count >= 72, count
           metrics = report["baselines"]["metricledger"]
-          assert metrics["scenario_success_count"] == 63, metrics["scenario_success_count"]
+          assert metrics["scenario_success_count"] == count, metrics["scenario_success_count"]
           assert metrics["unsafe_answer_count"] == 0, metrics["unsafe_answer_count"]
           assert metrics["scope_violation_count"] == 0, metrics["scope_violation_count"]
           assert metrics["zero_as_empty_count"] == 0, metrics["zero_as_empty_count"]
           assert metrics["unsupported_claim_count"] == 0, metrics["unsupported_claim_count"]
           assert metrics["evidence_violation_count"] == 0, metrics["evidence_violation_count"]
-          print("scenario and safety gates passed")
+          assert metrics["budget_violation_count"] == 0, metrics["budget_violation_count"]
+          print(f"scenario and safety gates passed: {count}")
           PY
       - name: Run in-process CLI
         run: python scripts/ask.py --json

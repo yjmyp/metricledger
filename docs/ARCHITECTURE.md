@@ -88,7 +88,7 @@ HTTP 边界还包括：
 
 - 加法指标：按语义允许的维度查询分组差分，计算各组对总变化的算术贡献。
 - 比率指标：分别诊断分子、分母和方向差异，不生成算术贡献 Claim。
-- 预算：默认最多 4 次查询；预算在执行前预留，耗尽时返回 `PARTIAL` 和 `BUDGET_EXHAUSTED`。
+- 预算：默认最多 4 次查询、最多 2 轮 planner 排序；预算在执行前预留，耗尽时返回 `PARTIAL` 和 `BUDGET_EXHAUSTED`。
 - 停止：当已诊断维度形成足够集中的贡献时停止继续遍历，避免无界探索。
 
 LLM 只接收指标观察摘要、允许的维度 ID/名称、已有证据摘要和剩余预算。它不能看到原始明细行，也不能把生成的字段、SQL 或数字写入正式结果。
@@ -122,7 +122,7 @@ SQLite 使用 WAL 模式，保存三类数据：
 - `scripts/build_scale_data.py` 生成两个各 100 万事件的确定性 DuckDB 快照，共 200 万事件，用于真实规模查询。
 - `scripts/benchmark_scale.py` 执行完整分析并保存 SQL、`EXPLAIN ANALYZE` 和查询耗时。
 - `scripts/benchmark_load.py` 执行混合 HTTP 并发负载，报告吞吐、P50/P95/P99、错误率、DuckDB/SQLite 增量计数和本地瓶颈归因。
-- `scripts/benchmark_planners.py` 在相同 15 个调查场景上比较启发式与 OpenAI-compatible planner。缺少端点时模型部分必须是 `NOT_RUN`；当前验收记录包含一次通过 DeepSeek OpenAI-compatible 接口完成的真实对比，结果见 `docs/verification/planner-report.md`。
+- `scripts/benchmark_planners.py` 在相同 18 个调查场景上比较启发式与 OpenAI-compatible planner。缺少端点时模型部分必须是 `NOT_RUN`；本轮没有配置模型端点，因此报告中的模型对比为 `NOT_RUN`，启发式部分正常完成，结果见 `docs/verification/planner-report.md`。
 - `deploy/prometheus/alerts.yml` 覆盖 5xx、P95、DuckDB、SQLite、分析失败、限流和认证异常。
 
 这些报告是本机可复现证据，不是生产 SLA。
@@ -153,7 +153,7 @@ SQLite 使用 WAL 模式，保存三类数据：
 
 ## Evaluation Boundary
 
-评测使用本仓库 63 个确定性合成场景，将 MetricLedger 与以下基线比较：
+评测使用本仓库 72 个确定性合成场景，将 MetricLedger 与以下基线比较：
 
 - `naive_text_to_sql`：故意绕过权限、把失败或空结果答成零的不安全对照。
 - `semantic_without_investigation`：保留语义与证据，但不做分组诊断。

@@ -4,24 +4,18 @@
 
 ## Acceptance Scope
 
-本次验收覆盖：
+本轮验收覆盖当前分支上的调查轨迹、两轮 planner 上限、预算耗尽语义、72 个确定性合成场景和交付门禁：
 
 - Python 单元与集成测试
 - Python 覆盖率统计
+- 无浏览器进程内 CLI
+- 72 个确定性评测场景与三个基线
 - React 组件测试
 - TypeScript 与 Vite 生产构建
 - npm 高危依赖审计
-- 63 个确定性评测场景
-- 200 万事件规模下的真实 DuckDB 查询与 `EXPLAIN ANALYZE`
-- 真实 HTTP API 上的并发混合负载与数据库瓶颈归因
-- 真实 OpenAI-compatible planner 与启发式 planner 的同场景对比
-- 当前代码的真实 API 启动
-- 直连 API 与 Vite 代理两条实时业务链路
-- 无浏览器、无 HTTP 服务的进程内 CLI
-- 临时公网隧道的首页、健康检查和完整业务冒烟
-- 多租户、RBAC、限流、追踪和 Prometheus 告警的自动化测试与静态校验
+- GitHub Actions 的后端、前端、配置和容器四个 job
 
-本记录不代表真实企业部署、真实流量、线上 SLA 或外部行业基准。
+本记录不代表真实企业部署、真实流量、线上 SLA 或外部行业基准。本轮没有重新执行 200 万事件规模测试与混合并发负载测试，历史报告仅作为旧证据保留。
 
 ## Verified Commands
 
@@ -33,96 +27,29 @@ npm --prefix web test -- --run
 npm --prefix web run build
 npm --prefix web audit --audit-level=high
 .\.venv\Scripts\python.exe scripts\run_eval.py
-.\.venv\Scripts\python.exe scripts\smoke_test.py --base-url http://127.0.0.1:8000
-.\.venv\Scripts\python.exe scripts\smoke_test.py --base-url http://127.0.0.1:5173
-.\.venv\Scripts\python.exe scripts\benchmark_scale.py
-.\.venv\Scripts\python.exe scripts\benchmark_load.py --base-url http://127.0.0.1:8011 --requests 120 --concurrency 12
 .\.venv\Scripts\python.exe scripts\benchmark_planners.py
-.\.venv\Scripts\python.exe scripts\smoke_test.py --base-url https://puny-bugs-glow.loca.lt
 ```
 
 ## Results
 
 | Check | Result |
 |---|---|
-| Backend tests | `110 passed` |
+| Backend tests | `138 passed` |
 | Python coverage | `93%` |
-| In-process CLI | passed, 2 Claims, 4 evidence artifacts, 4 queries |
-| Frontend tests | `3 passed` |
+| In-process CLI | `ADMITTED`, `COMPLETE`, 2 Claims, 4 evidence artifacts, 4 queries |
+| Frontend tests | `4 passed` |
 | Production build | TypeScript check and Vite build passed |
-| Dependency audit | `0` vulnerabilities |
-| Evaluation scenarios | `63` |
-| MetricLedger scenario success | `63/63` |
+| Dependency audit | `0` high-severity vulnerabilities |
+| Evaluation scenarios | `72` |
+| MetricLedger scenario success | `72/72` |
 | Unsafe answers | `0` |
 | Scope violations | `0` |
 | Empty result answered as zero | `0` |
 | Unsupported Claims | `0` |
 | Evidence violations | `0` |
 | Budget violations | `0` |
-| Direct API smoke | passed, 2 Claims, 4 queries |
-| Vite proxy smoke | passed, 2 Claims, 4 queries |
-| Public temporary demo smoke | passed, 2 Claims, 4 queries |
 
 后端测试存在 1 条第三方弃用警告：Starlette 当前 `TestClient` 对 `httpx` 的兼容提示。该警告不改变测试结果。
-
-## Scale Evidence
-
-机器可读结果：[scale-results.json](scale-results.json)
-
-人类可读报告：[scale-report.md](scale-report.md)
-
-本轮使用仓库脚本确定性生成并实际查询了 **2,000,000** 条事件：
-
-| 指标 | 本轮实测 |
-|---|---:|
-| 快照数 | 2 |
-| 每个快照事件数 | 1,000,000 |
-| DuckDB 文件 | 19.26 MiB |
-| `demo` / `tenant_b` 事件数 | 1,800,000 / 200,000 |
-| 单次调查 SQL 查询数 | 4 |
-| DuckDB 总查询耗时 | 353.288 ms |
-| DuckDB 平均查询耗时 | 88.322 ms |
-| 服务端到端耗时 | 388.935 ms |
-
-`EXPLAIN ANALYZE` 显示目标快照实际进入过滤和聚合阶段约 `116,662` 行。数据规模可以由 `scripts/build_scale_data.py` 重建；耗时受本机 CPU、内存、DuckDB 版本和文件缓存影响。
-
-## Mixed-Load Evidence
-
-机器可读结果：[load-results.json](load-results.json)
-
-人类可读报告：[load-report.md](load-report.md)
-
-本轮对真实运行的 HTTP API 发起 **120** 个混合请求，并发 **12**：
-
-| 指标 | 本轮实测 |
-|---|---:|
-| 吞吐 | 10.644 req/s |
-| 持续时间 | 11.274 s |
-| P50 | 155.458 ms |
-| P95 | 3,893.734 ms |
-| P99 | 4,823.195 ms |
-| HTTP/传输错误 | 0 |
-| 非预期业务错误 | 0 |
-| 错误率 | 0.00% |
-
-DuckDB 执行 **168** 次查询、累计 **113,169.791 ms**、0 错误；SQLite 账本执行 72 次写入和 12 次读取，总计 1,587.413 ms、0 错误。DuckDB 查询耗时占累计请求时间约 **88.83%**，SQLite 占 **1.25%**，因此本轮首要瓶颈判定为 DuckDB。最慢路由是 `investigate`，P95 为 4,823.195 ms。
-
-这是单机、单 API 进程、本地 DuckDB/SQLite 的负载测量，不是生产容量、分布式 trace 或线上 SLA 结论。
-
-## Planner Evidence
-
-机器可读结果：[planner-results.json](planner-results.json)
-
-人类可读报告：[planner-report.md](planner-report.md)
-
-本轮实际调用 DeepSeek 的 OpenAI-compatible `chat/completions` 接口，模型标签为 `api.deepseek.com/deepseek-chat`。输入只包含观察摘要、允许维度和剩余查询预算，不暴露原始事件行。
-
-| Planner | 用例 | 失败率 | 回退率 | P50 | P95 |
-|---|---:|---:|---:|---:|---:|
-| `heuristic` | 15 | 0.00% | 0.00% | 0.004 ms | 0.013 ms |
-| `deepseek-chat` | 15 | 0.00% | 0.00% | 915.992 ms | 1,591.464 ms |
-
-模型结果 `MODEL_SUCCESS=15`。这是 15 个仓库内确定性场景的本轮结果，不是通用模型榜单或生产 SLA；回退路径另由自动化测试覆盖。
 
 ## Evaluation Evidence
 
@@ -130,83 +57,67 @@ DuckDB 执行 **168** 次查询、累计 **113,169.791 ms**、0 错误；SQLite 
 
 人类可读报告：[eval-report.md](eval-report.md)
 
-最近一次评测的基线结果：
+| Baseline | Scenario success | Unsafe | Scope violations | P95 |
+|---|---:|---:|---:|---:|
+| `naive_text_to_sql` | `32/72` | `40` | `9` | `437.03 ms` |
+| `semantic_without_investigation` | `54/72` | `0` | `0` | `209.15 ms` |
+| `metricledger` | `72/72` | `0` | `0` | `335.45 ms` |
 
-| Baseline | Scenario success | Unsafe | Scope violations |
-|---|---:|---:|---:|
-| `naive_text_to_sql` | `27/63` | `36` | `8` |
-| `semantic_without_investigation` | `48/63` | `0` | `0` |
-| `metricledger` | `63/63` | `0` | `0` |
+调查场景共 18 个：13 个得到 `COMPLETE`，5 个按场景标签明确要求 `PARTIAL`。其中 `supported_investigation-01-016` 在 4 次查询后因预算耗尽停止，报告为 `PARTIAL` 和 `budget_exhausted`，没有伪造完整结论。
 
-本次本机单进程 P95 延迟分别为 `344.33 ms`、`182.08 ms` 和 `351.50 ms`。这些数字受当前机器负载影响，不代表线上 SLA。
+5 个预期 `PARTIAL` 场景是：
 
-`metricledger` 的“调查完整率”显示为 `11/15`，表示 15 个支持调查的场景中有 11 个实际得到 `COMPLETE`。其余 4 个场景在评测标签中明确要求 `PARTIAL`，且状态、阻断结论和安全边界均正确，因此仍是成功场景，并不表示评测失败。4 个预期 `PARTIAL` 场景是：`supported_investigation-01-002`、`supported_investigation-01-003`、`supported_investigation-01-006`、`supported_investigation-01-007`。
+- `supported_investigation-01-002`
+- `supported_investigation-01-003`
+- `supported_investigation-01-006`
+- `supported_investigation-01-007`
+- `supported_investigation-01-016`
 
-评测报告的生成时间、提交、工作区状态、环境版本、完整场景分布和本机 P95 延迟由 `scripts/run_eval.py` 写入报告，避免在文档中手工伪造或过期。本次报告在交付提交前生成，因此报告中的 `worktree_dirty: true` 和当时的 HEAD 是预期的工作区快照，不代表推送后的最终提交号。
+这些延迟是本机单进程测量，受当前机器负载影响，不代表线上 SLA。
 
-## Live Smoke Assertions
+## Planner Evidence
 
-实时冒烟脚本验证：
+机器可读结果：[planner-results.json](planner-results.json)
 
-- `/api/health` 返回 `ok`，并报告 2 个固定快照。
-- `/api/catalog` 只暴露 `paid_gmv`、`paid_conversion_rate`、`cancel_rate`。
-- `/api/eval/latest` 返回当前参数化评测报告。
-- 示例问题返回 `ADMITTED`。
-- 至少产生 2 条 Claim，且每条都有证据引用。
-- SQL 审计存在，首条语句为 `SELECT`。
-- 渲染文本包含 `732,400.00` 和 `-9.18%`。
-- 渲染文本不包含残留的 `{evidence:` 占位符。
+人类可读报告：[planner-report.md](planner-report.md)
+
+| Planner | 用例 | 状态 | 失败率 | 回退率 | Tokens |
+|---|---:|---|---:|---:|---:|
+| `heuristic` | `18` | `COMPLETE` | `0.00%` | `0.00%` | `0` |
+| OpenAI-compatible model | `0` | `NOT_RUN` | 未运行 | 未运行 | 未运行 |
+
+当前环境没有配置 `METRICLEDGER_PLANNER_BASE_URL` 与 `METRICLEDGER_PLANNER_MODEL`，因此真实模型对比为 `NOT_RUN`。本轮不沿用任何旧模型调用结果，也不把启发式 planner 的结果表述为真实模型效果。
 
 ## No-Browser CLI
 
-`scripts/ask.py` 在单进程中构造与 API 相同的 `AnalysisService`，不启动 Uvicorn，也不访问浏览器。验收断言包括：
+`scripts/ask.py` 在单进程中构造与 API 相同的 `AnalysisService`，不启动 Uvicorn，也不访问浏览器。本轮实测：
 
 - 准入状态为 `ADMITTED`。
 - 完整度为 `COMPLETE`。
-- 输出包含 `732,400.00` 和 `-9.18%`。
-- 生成 2 条 Claim，且每条 Claim 都有证据引用。
-- 使用 4 次查询，所有 SQL 审计语句均为 `SELECT`。
+- 生成 2 条 Claim、4 个证据对象和 4 条只读 SQL。
+- `planner_tokens_used=0`，`planner_usage_complete=true`。
+- 调查执行一轮后因 `concentrated_contribution` 停止。
 
-## React Workbench Boundary
+## Container And Deployment
 
-React 工作台已通过组件测试、TypeScript 检查、Vite 生产构建和开发服务器 `/api` 代理冒烟。网页是可选的展示入口，不是核心分析运行前提；本轮最终验收没有重新执行 Playwright 人工浏览器检查，因此不把浏览器控制台或截图列为本次新鲜证据。
+本机没有安装 `docker` 命令，因此本机 `docker version` 和 Compose 启动为 `NOT_RUN`。容器交付只能由 GitHub Actions 的 `container` job 验证；在真实 job 成功前，不把容器冒烟记录为已通过。
 
-## Security And Operations
+长期公网托管本轮没有重新验证，也没有新增托管凭据；该部分仍为 `NOT_RUN`。
 
-本轮验证了：
+## Historical Operational Evidence
 
-- 认证身份覆盖请求自报的租户与过滤范围。
-- 跨租户读取与不存在资源不可区分。
-- `viewer`、`analyst`、`admin` 的最小角色边界。
-- Bearer 令牌只保存哈希匹配结果，不在日志或账本中保存明文。
-- 单进程、按主体限流，并在超限时返回 429 和 `Retry-After`。
-- W3C `traceparent`、请求 ID、trace ID 和 JSON 访问日志传播。
-- Prometheus HTTP、DuckDB、SQLite、认证、限流和分析问题指标。
-- 5xx、P95、DuckDB、账本、分析失败、限流和认证异常共 7 条告警表达式。
-
-7 条 PromQL 表达式已使用 `promql-parser` 解析成功；告警引用的 8 个指标名均存在于实时 `/api/metrics` 返回的 15 个指标中。Compose、Prometheus、告警和 GitHub Actions 四份 YAML 均解析成功。
-
-当前限流器是单进程内存实现；SQLite 账本是单机持久化实现。多副本生产环境应替换为共享限流存储和更高并发的审计存储。
-
-## Delivery Evidence
-
-- GitHub Actions 工作流：后端测试、覆盖率、63 场景安全门禁、CLI、前端测试、构建、依赖审计、部署 YAML 校验，以及生产镜像构建与业务冒烟。
-- 多阶段 `Dockerfile`：GitHub Actions 已真实构建并启动镜像；静态前端、非 root API 运行时、健康检查和完整业务冒烟均已通过。
-- `compose.yaml`：API 数据卷、认证/planner 环境变量、限流配置和 Prometheus。
-- [CI run 45759594427](https://github.com/yjmyp/metricledger/actions/runs/45759594427) 的 `backend`、`frontend`、`config`、`container` 四个任务全部成功。本轮本机没有 Docker/Podman，因此本机直接执行 `docker compose up --build` 仍为 `NOT_RUN`。
-- 临时公网 Demo `https://puny-bugs-glow.loca.lt` 在验收时已通过远程首页和完整业务冒烟。它依赖当前本机 API 与隧道进程，进程结束后失效，不等同于长期托管部署。
-- 长期公网托管需要云主机、域名和 Secret Manager；本轮没有这些托管凭据，因此持久部署为 `NOT_RUN`。
+早先版本曾完成 200 万事件规模查询和 120 请求、12 并发的混合负载测试，报告仍保留在 [scale-report.md](scale-report.md) 与 [load-report.md](load-report.md)。这些结果不是本轮新代码的新鲜验收数据，不能替代本轮测试或 CI。
 
 ## Guarantee
 
 当前实现可以证明的工程保证是：
 
-> 不伪造数字、不脱离证据、不越权返回、不把失败或空结果冒充业务零值。
+> 不伪造数字、不脱离证据、不越权返回、不把失败或空结果冒充业务零值，也不在预算耗尽时伪造完整调查。
 
 不能承诺的边界是：
 
 - 所有自然语言问题都能自动理解。
 - 合成评测结果等同于真实企业收益或公开榜单成绩。
 - 当前单机参考实现已经满足分布式限流、跨节点租户治理和线上高可用要求。
-- 15 个合成 planner 场景的结果可以外推到所有真实问题或所有模型端点。
-- 临时公网隧道等同于持久、带 SLA 的公网部署。
+- 未运行的真实模型对比已经通过。
+- 本机未执行的容器或长期部署链路已经通过。

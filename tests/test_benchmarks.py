@@ -7,6 +7,7 @@ from pathlib import Path
 import httpx
 import pytest
 
+from metricledger.evaluation import load_suite
 from scripts.benchmark_load import infer_bottleneck, percentile, run_load_benchmark
 from scripts.benchmark_planners import run_planner_benchmark
 from scripts.benchmark_scale import run_scale_benchmark
@@ -58,7 +59,15 @@ def test_planner_benchmark_marks_model_not_run_without_credentials(
     )
 
     assert report["status"] == "COMPLETE"
-    assert report["heuristic"]["case_count"] == 15
+    expected_case_count = sum(
+        scenario.category == "supported_investigation"
+        for scenario in load_suite().scenarios
+    )
+    assert report["heuristic"]["case_count"] == expected_case_count
+    assert report["scope"] == (
+        f"{expected_case_count} deterministic "
+        "supported_investigation scenarios"
+    )
     assert report["model"]["status"] == "NOT_RUN"
     assert report["model"]["credentials_configured"] is False
     assert "NOT_RUN" in (tmp_path / "planner.md").read_text(encoding="utf-8")
@@ -110,12 +119,16 @@ def test_planner_benchmark_runs_configured_openai_compatible_models(
         model_client=httpx.Client(transport=httpx.MockTransport(handler)),
     )
 
+    expected_case_count = sum(
+        scenario.category == "supported_investigation"
+        for scenario in load_suite().scenarios
+    )
     assert report["model"]["status"] == "RUN"
-    assert report["model"]["case_count"] == 15
+    assert report["model"]["case_count"] == expected_case_count
     assert report["model"]["fallback_rate"] == 0.0
     assert report["model"]["failure_rate"] == 0.0
-    assert report["model"]["usage_complete_count"] == 15
-    assert report["model"]["planner_tokens"] == 180
+    assert report["model"]["usage_complete_count"] == expected_case_count
+    assert report["model"]["planner_tokens"] == expected_case_count * 12
 
 
 def test_percentile_uses_nearest_rank_without_interpolation():
