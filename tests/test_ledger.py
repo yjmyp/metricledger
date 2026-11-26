@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
@@ -118,3 +119,54 @@ def test_ledger_records_write_and_read_latency_counters(ledger, response):
     assert ledger.read_count == 1
     assert ledger.read_error_count == 0
     assert ledger.total_read_ms >= 0
+
+
+def test_identical_analysis_write_is_idempotent(ledger, response):
+    ledger.save(response)
+    ledger.save(response)
+
+    assert ledger.write_count == 2
+    assert ledger.write_error_count == 0
+
+
+def test_concurrent_identical_analysis_writes_are_serialized(
+    ledger,
+    response,
+):
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        futures = [pool.submit(ledger.save, response) for _ in range(2)]
+        for future in futures:
+            future.result()
+
+    assert ledger.get(response.analysis_id) is not None
+    assert ledger.write_error_count == 0
+
+
+def test_concurrent_identical_artifact_writes_create_one_row(
+    ledger,
+    response,
+):
+    second = response.model_copy(
+        update={
+            "analysis_id": "an_second",
+            "claims": [],
+            "sql_audit": [],
+        }
+    )
+    second = second.model_copy(
+        update={"evidence": [response.evidence[0]]}
+    )
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        futures = [
+            pool.submit(ledger.save, item) for item in (response, second)
+        ]
+        for future in futures:
+            future.result()
+
+    with ledger._connect() as connection:
+        count = connection.execute(
+            "SELECT count(*) FROM result_artifacts WHERE result_id = ?",
+            (response.evidence[0].result_id,),
+        ).fetchone()[0]
+    assert count == 1

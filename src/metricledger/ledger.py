@@ -90,71 +90,99 @@ class SqliteLedger:
             else "local"
         )
         with self._connect() as connection:
-            existing = connection.execute(
-                "SELECT payload FROM analyses WHERE analysis_id = ?",
-                (response.analysis_id,),
-            ).fetchone()
-            if existing is not None:
-                if existing[0] == payload:
-                    return
-                raise ValueError("analysis ledger entries are immutable")
-            artifacts_to_insert = []
-            for artifact in response.evidence:
-                artifact_payload = _canonical_json(
-                    artifact.model_dump(mode="json")
-                )
-                artifact_existing = connection.execute(
-                    "SELECT payload FROM result_artifacts WHERE result_id = ?",
-                    (artifact.result_id,),
-                ).fetchone()
-                if artifact_existing is None:
-                    artifacts_to_insert.append(
-                        (artifact, artifact_payload)
-                    )
-                elif artifact_existing[0] != artifact_payload:
-                    raise ValueError("result artifacts are immutable")
-            connection.execute(
-                """
-                INSERT INTO analyses(analysis_id, tenant_id, payload)
-                VALUES (?, ?, ?)
-                """,
-                (response.analysis_id, tenant_id, payload),
-            )
-            for artifact, artifact_payload in artifacts_to_insert:
-                connection.execute(
-                    """
-                    INSERT INTO result_artifacts(
-                        result_id, analysis_id, tenant_id, payload
-                    )
-                    VALUES (?, ?, ?, ?)
-                    """,
-                    (
-                        artifact.result_id,
+            connection.execute("BEGIN IMMEDIATE")
+            try:
+                self._insert_immutable(
+                    connection,
+                    table="analyses",
+                    key_column="analysis_id",
+                    key_value=response.analysis_id,
+                    payload=payload,
+                    insert_columns=(
+                        "analysis_id",
+                        "tenant_id",
+                        "payload",
+                    ),
+                    insert_values=(
                         response.analysis_id,
                         tenant_id,
-                        artifact_payload,
+                        payload,
                     ),
+                    message="analysis ledger entries are immutable",
                 )
-            for claim in response.claims:
-                for result_id in claim.claim.evidence_refs:
-                    edge_id = f"{claim.claim.claim_id}:{result_id}"
-                    connection.execute(
-                        """
-                        INSERT INTO graph_edges(
-                            edge_id, analysis_id, tenant_id, source_id,
-                            relation, target_id
-                        )
-                        VALUES (?, ?, ?, ?, 'SUPPORTED_BY', ?)
-                        ON CONFLICT(edge_id) DO NOTHING
-                        """,
-                        (
-                            edge_id,
+                for artifact in response.evidence:
+                    artifact_payload = _canonical_json(
+                        artifact.model_dump(mode="json")
+                    )
+                    self._insert_immutable(
+                        connection,
+                        table="result_artifacts",
+                        key_column="result_id",
+                        key_value=artifact.result_id,
+                        payload=artifact_payload,
+                        insert_columns=(
+                            "result_id",
+                            "analysis_id",
+                            "tenant_id",
+                            "payload",
+                        ),
+                        insert_values=(
+                            artifact.result_id,
                             response.analysis_id,
                             tenant_id,
-                            claim.claim.claim_id,
-                            result_id,
+                            artifact_payload,
                         ),
+                        message="result artifacts are immutable",
                     )
+                for claim in response.claims:
+                    for result_id in claim.claim.evidence_refs:
+                        connection.execute(
+                            """
+                            INSERT INTO graph_edges(
+                                edge_id, analysis_id, tenant_id,
+                                source_id, relation, target_id
+                            )
+                            VALUES (?, ?, ?, ?, 'SUPPORTED_BY', ?)
+                            ON CONFLICT(edge_id) DO NOTHING
+                            """,
+                            (
+                                f"{claim.claim.claim_id}:{result_id}",
+                                response.analysis_id,
+                                tenant_id,
+                                claim.claim.claim_id,
+                                result_id,
+                            ),
+                        )
+            except Exception:
+                connection.rollback()
+                raise
+
+    @staticmethod
+    def _insert_immutable(
+        connection: sqlite3.Connection,
+        *,
+        table: str,
+        key_column: str,
+        key_value: str,
+        payload: str,
+        insert_columns: tuple[str, ...],
+        insert_values: tuple[object, ...],
+        message: str,
+    ) -> None:
+        placeholders = ", ".join("?" for _ in insert_columns)
+        columns = ", ".join(insert_columns)
+        try:
+            connection.execute(
+                f"INSERT INTO {table}({columns}) VALUES ({placeholders})",
+                insert_values,
+            )
+        except sqlite3.IntegrityError:
+            existing = connection.execute(
+                f"SELECT payload FROM {table} WHERE {key_column} = ?",
+                (key_value,),
+            ).fetchone()
+            if existing is None or existing[0] != payload:
+                raise ValueError(message) from None
 
     def get(
         self,
