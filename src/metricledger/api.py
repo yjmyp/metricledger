@@ -31,6 +31,7 @@ def create_app(
     rate_limiter: InMemoryRateLimiter | None = None,
     metrics: RequestMetrics | None = None,
     static_dir: str | Path | None = None,
+    eval_path: str | Path | None = None,
 ) -> FastAPI:
     app = FastAPI(
         title="MetricLedger API",
@@ -41,6 +42,11 @@ def create_app(
     app.state.authenticator = authenticator
     app.state.rate_limiter = rate_limiter
     app.state.metrics = metrics or RequestMetrics()
+    configured_eval_path = (
+        Path(eval_path)
+        if eval_path is not None
+        else Path(__file__).resolve().parents[2] / "eval" / "results.json"
+    )
 
     @app.middleware("http")
     async def observe_request(request: Request, call_next):
@@ -204,7 +210,7 @@ def create_app(
     @app.get("/api/eval/latest")
     def latest_evaluation(request: Request) -> dict:
         authenticated_identity(request)
-        return _latest_eval_report()
+        return _latest_eval_report(configured_eval_path)
 
     if static_dir is not None:
         directory = Path(static_dir)
@@ -231,8 +237,7 @@ def _response_payload(response: AnalysisResponse) -> dict:
     return payload
 
 
-def _latest_eval_report() -> dict:
-    path = Path(__file__).resolve().parents[2] / "eval" / "results.json"
+def _latest_eval_report(path: Path) -> dict:
     if not path.is_file():
         return {
             "status": "NOT_RUN",

@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
@@ -107,3 +108,30 @@ def test_eval_endpoint_returns_a_valid_state(client: TestClient):
     assert body["status"] in {"COMPLETE", "NOT_RUN", "INVALID"}
     if body["status"] == "COMPLETE":
         assert body["scenario_count"] >= 60
+
+
+def test_eval_endpoint_reads_configured_report_path(
+    client: TestClient,
+    tmp_path,
+):
+    report_path = tmp_path / "results.json"
+    report_path.write_text(
+        json.dumps(
+            {
+                "status": "COMPLETE",
+                "scenario_count": 63,
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    configured_client = TestClient(
+        create_app(
+            client.app.state.service,
+            eval_path=report_path,
+        )
+    )
+
+    body = configured_client.get("/api/eval/latest").json()
+    assert body["status"] == "COMPLETE"
+    assert body["scenario_count"] == 63

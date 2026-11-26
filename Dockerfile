@@ -12,6 +12,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     METRICLEDGER_DB=/app/data/metricledger.duckdb \
     METRICLEDGER_LEDGER=/app/data/audit.sqlite3 \
+    METRICLEDGER_EVAL_PATH=/app/eval/results.json \
     METRICLEDGER_STATIC_DIR=/app/web/dist \
     METRICLEDGER_HOST=0.0.0.0 \
     METRICLEDGER_PORT=8000

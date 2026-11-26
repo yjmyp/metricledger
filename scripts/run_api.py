@@ -24,6 +24,10 @@ def main() -> None:
     static_dir = Path(
         os.environ.get("METRICLEDGER_STATIC_DIR", "web/dist")
     )
+    configured_eval_path = os.environ.get(
+        "METRICLEDGER_EVAL_PATH",
+        "",
+    ).strip()
     uvicorn.run(
         create_app(
             service,
@@ -31,6 +35,7 @@ def main() -> None:
             rate_limiter=rate_limiter_from_environment(),
             metrics=RequestMetrics(),
             static_dir=static_dir if static_dir.is_dir() else None,
+            eval_path=configured_eval_path or None,
         ),
         host=os.environ.get("METRICLEDGER_HOST", "127.0.0.1"),
         port=int(os.environ.get("METRICLEDGER_PORT", "8000")),
