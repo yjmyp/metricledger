@@ -233,5 +233,5 @@ Natural language
 - `naive_text_to_sql` 是故意不安全的确定性对照组，不是具名商用产品。
 - 当前版本是单机参考实现。限流是单进程内存策略；SQLite 账本和多租户隔离适合演示与审计闭环，不等同于生产级高可用方案。
 - 真实模型对比本轮使用 `api.deepseek.com/deepseek-chat` 在 15 个确定性场景上运行；结果不是通用模型榜单或生产 SLA，详见 [planner-report.md](docs/verification/planner-report.md)。
-- 本轮机器没有 Docker/Podman，也没有长期托管凭据或域名。Compose 与 CI 配置已提供并通过静态校验，容器实跑与持久公网部署仍为 `NOT_RUN`；验收时的临时公网隧道结果记录在 [acceptance.md](docs/verification/acceptance.md)。
+- 本轮本机没有 Docker/Podman，也没有长期托管凭据或域名。GitHub Actions 已真实构建并启动精简生产镜像，以非 root 用户完成健康检查与业务冒烟；本机 Compose 启动和持久公网部署仍为 `NOT_RUN`。验收记录见 [acceptance.md](docs/verification/acceptance.md)。
 - 自然语言理解仍可能触发澄清；系统只保证不猜测、不越权、不伪造，而不是保证所有问题都能自动回答。

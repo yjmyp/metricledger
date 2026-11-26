@@ -190,10 +190,10 @@ React 工作台已通过组件测试、TypeScript 检查、Vite 生产构建和�
 
 ## Delivery Evidence
 
-- GitHub Actions 工作流：后端测试、覆盖率、63 场景安全门禁、CLI、前端测试、构建、依赖审计和部署 YAML 校验。
-- 多阶段 `Dockerfile`：构建静态前端，以非 root 用户运行 API，并提供健康检查。
+- GitHub Actions 工作流：后端测试、覆盖率、63 场景安全门禁、CLI、前端测试、构建、依赖审计、部署 YAML 校验，以及生产镜像构建与业务冒烟。
+- 多阶段 `Dockerfile`：GitHub Actions 已真实构建并启动镜像；静态前端、非 root API 运行时、健康检查和完整业务冒烟均已通过。
 - `compose.yaml`：API 数据卷、认证/planner 环境变量、限流配置和 Prometheus。
-- 静态校验通过不等于容器已实跑；本轮机器没有 Docker/Podman，因此 `docker compose up --build` 为 `NOT_RUN`。
+- [CI run 45759594427](https://github.com/yjmyp/metricledger/actions/runs/45759594427) 的 `backend`、`frontend`、`config`、`container` 四个任务全部成功。本轮本机没有 Docker/Podman，因此本机直接执行 `docker compose up --build` 仍为 `NOT_RUN`。
 - 临时公网 Demo `https://puny-bugs-glow.loca.lt` 在验收时已通过远程首页和完整业务冒烟。它依赖当前本机 API 与隧道进程，进程结束后失效，不等同于长期托管部署。
 - 长期公网托管需要云主机、域名和 Secret Manager；本轮没有这些托管凭据，因此持久部署为 `NOT_RUN`。
 
